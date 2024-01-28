@@ -9,6 +9,12 @@
 #include <math.h>
 #include <iostream>
 
+#define INITKIDS (1<<6)
+
+#define MAXMOVES 3
+
+#define PRUNING 0
+
 #define BIAS 1.775
 
 #define END 0
@@ -21,6 +27,7 @@
 #define EMPTYTILE 1
 #define CLAIMEDTILE 2
 #define BLOCKEDTILE 3
+#define ADJTILE 4
 
 #define CLAIM 0 
 #define PLACE 1
@@ -31,6 +38,7 @@
 #define CLAIMONE 2
 #define PLACEBLOCK 3
 #define SKIPCHOICE 4
+#define NULLACTION -1
 
 
 
@@ -57,6 +65,8 @@
 #ifndef INCLUDES
 #define INCLUDES
 
+
+
 struct move{
     uint32_t action;
     int32_t x;
@@ -68,16 +78,15 @@ struct tile{
     uint8_t owner = 0;
 };
 
-struct boardInstance{
-    //haha, thats a funny joke
-    //putting stuff here?
-    //nah fam
-    tile** board;
-};
-
 struct coord{
     int x;
     int y;
+};
+
+struct tnode{
+    coord crds;
+    tnode* next;
+    tnode* prev;
 };
 
 struct __attribute__ ((packed)) position{
