@@ -5,6 +5,7 @@
 #include "WindowManager.hpp"
 #include "FieldManager.hpp"
 #include "GameMaster.hpp"
+#include "bot_gen0.hpp"
 
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
@@ -19,6 +20,8 @@ int main(int argc, char** argv){
     int winner = -1;
     bool winmsg = false;
 
+    BotG0 bot;
+    /*
     WindowManager winman;
     FieldManager fieldman((((float)WIDTH)/HEIGHT));
     GameMaster gamemast(2);
@@ -47,13 +50,14 @@ int main(int argc, char** argv){
             winmsg = true;
         }
         
-        /**********************************************************************************/
 
     }
  
     winman.end();
 
-
+*/
+    
+    fprintf(stderr, "ending main\n");
     return 0;
 }
 

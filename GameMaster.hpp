@@ -1,5 +1,6 @@
 #include "includes.h"
 #include "WindowManager.hpp"
+#include "MoveList.hpp"
 
 #ifndef FMINC
 #define FMINC
@@ -15,18 +16,14 @@
 #ifndef GAME_MASTER
 #define GAME_MASTER
 
-struct bounds{
-    uint32_t xmax;
-    uint32_t xmin;
-    uint32_t ymax;
-    uint32_t ymin;
-};
+
 
 class GameMaster{
 
     private:
     bounds lim;
-    move curmoves[3];
+    MoveList curmoves;
+    MoveList prevmoves;
     uint8_t movedex;
 
     tile** field;
@@ -83,9 +80,8 @@ class GameMaster{
     tile getTile(int x, int y);
     tile** getField(){return field;}
 
-    boardInstance getBoard();
-
-    move* getMoves(uint8_t* count){*count = movedex; return curmoves;}
+    MoveList getCurMoves(){return curmoves;}
+    MoveList getPrevMoves(){return prevmoves;}
 
     //void readkeys(GLFWwindow* window, int key, int scancode, int action, int mods);
 };

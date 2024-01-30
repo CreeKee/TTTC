@@ -166,10 +166,7 @@ bool GameMaster::gameAction(int action, int x, int y, int* winner){
 
     if(ret){
         UPDATELIMS;
-
-        curmoves[movedex].x = x;
-        curmoves[movedex].y = y;
-        curmoves[movedex++].action = action;
+        curmoves.addMove(action, x, y);
     }
 
     return ret;
@@ -296,7 +293,8 @@ int GameMaster::takeTurn(){
             phase = READY;
             select = -1;
 
-            movedex = 0;
+            prevmoves = curmoves;
+            curmoves = MoveList();
         }
 
     }
@@ -399,23 +397,5 @@ coord GameMaster::getDesiredTile(){
     return crds;
 }
 
-boardInstance GameMaster::getBoard(){
-    boardInstance brdi;
-    //uint32_t size = (lim.xmax-lim.xmin)*(lim.ymax-lim.ymin);
 
-    brdi.board = (tile**)malloc(sizeof(tile)*(lim.xmax-lim.xmin));
-
-    for(int i = 0; i < (lim.xmax-lim.xmin); i++){
-        brdi.board[i] = (tile*)malloc(sizeof(tile)*(lim.ymax-lim.ymin));
-    }
-
-    for(int i = 0; i < (lim.xmax-lim.xmin); i++){
-        for(int j = 0; j < (lim.ymax-lim.ymin); j++){
-            brdi.board[i][j] = field[i+lim.xmin][i+lim.ymin];
-        }
-    }
-
-    return brdi;
-
-}
 

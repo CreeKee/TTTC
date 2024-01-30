@@ -9,11 +9,27 @@
 #include <math.h>
 #include <iostream>
 
+#define DISPLAYBOARD(code)for(int x = 0; x<40; x++){\
+                for(int y = 0; y<40; y++){\
+                    code;\
+                }\
+                fprintf(stderr, "\n");\
+            }
+
+//used in getAllMoves() in boardInstance
+#define LISTERATION(code)for(int x = 0; x < x_lim; x++){\
+        for(int y = 0; y < y_lim; y++){\
+            code\
+        }\
+    }
+
+
 #define INITKIDS (1<<6)
 
 #define MAXMOVES 3
 
-#define PRUNING 0
+#define PRUNING 1
+#define DBG 0
 
 #define BIAS 1.775
 
@@ -28,6 +44,7 @@
 #define CLAIMEDTILE 2
 #define BLOCKEDTILE 3
 #define ADJTILE 4
+#define EBLOCK 5
 
 #define CLAIM 0 
 #define PLACE 1
@@ -49,6 +66,7 @@
 #define WIDTH 1280
 #define INITDIM 20
 #define RATIO (WIDTH/HEIGHT);
+#define BOARDINSTINIT 7
 
 #define TILE   1
 #define CROSS  2
@@ -87,6 +105,13 @@ struct tnode{
     coord crds;
     tnode* next;
     tnode* prev;
+};
+
+struct bounds{
+    uint32_t xmax;
+    uint32_t xmin;
+    uint32_t ymax;
+    uint32_t ymin;
 };
 
 struct __attribute__ ((packed)) position{
