@@ -11,6 +11,7 @@ class gtNode{
     uint32_t maxKids;
     bool isleaf;
     boardInstance boardInst;
+    uint32_t goldenIndex;
     
     gtNode(){children = nullptr;}
     gtNode(boardInstance incBoard);
@@ -25,10 +26,11 @@ class gtNode{
         }
     }
 
-    void goldenChild(gtNode* gold){
-        childCount = 1;
+    void goldenChild(uint32_t index){
+        /*childCount = 1;
         children = (gtNode**)realloc(children, sizeof(gtNode*));
-        children[0] = gold;
+        children[0] = gold;*/
+        goldenIndex = index;
     }
 
     void expandPlaceThreeEmpty();

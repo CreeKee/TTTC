@@ -45,19 +45,25 @@ void gtObserver::updateBoard(MoveList mvl){
         }
     }
 
+    monteCarloStore(kidDex);
+
     newhead = head->children[kidDex];
     free(head);
     head = newhead;
 
+
+    return;
 }
 
 MoveList gtObserver::getBestAction(){
     
     gtNode* newhead;
 
-    newhead = head->children[0];
+    newhead = head->children[head->goldenIndex];
     free(head);
     head = newhead;
+
+
 
     return head->boardInst.diff;
 }
@@ -73,7 +79,10 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
 
     uint32_t val;
     uint32_t bestVal = 0;
+    int32_t hardwin = 0;
     gtNode* bestChild;
+
+    uint32_t choice;
     
     //fprintf(stderr,"beginning computation at depth %d, count =  %d\n", depth, compute_count++);
     
@@ -92,7 +101,10 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
         for(uint32_t child = 0; child < curNode->childCount; child++){
 
             //evaluate all newely generated children
-            val = evaluate(curNode->children[child]->boardInst);
+            val = brian.evaluate(curNode->children[child]->boardInst, &hardwin);
+
+            if(bestVal)
+
 
             //if it will be our turn when the current level is accessed then we predetermine the best move
             if(doMax){
@@ -101,23 +113,27 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
                 if(val >= bestVal){
                     bestVal = val;
                     bestChild = (curNode->children[child]);
+                    choice = child;
+                    curNode->goldenChild(choice);
                 }
             }
 
             //compute all children because we dont know if our opponent is optimal
             else{
                 //val = computeLayer((curNode->children[child]), !doMax, depth+1);
-                if(val <= bestVal){
+                /*if(val <= bestVal){
                     bestVal = val;
                     bestChild = (curNode->children[child]);
+                    choice = child;
+                    curNode->goldenChild(choice);
                 }
-                bestChild = (curNode->children[child]);
+                bestChild = (curNode->children[child]);*/
             }
         }
 
         //alpha pruning (no beta pruning)
         if(doMax && PRUNING){
-            curNode->goldenChild(bestChild);
+            curNode->goldenChild(choice);
         }
     }
     else{
@@ -133,6 +149,27 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
 
 int32_t gtObserver::evaluate(boardInstance boardInst) {
 
+    for(int y = 0; y < boardInst.y_lim-1; y++){
+        for(int x = 0; x < boardInst.x_lim-1; x++){
+            if(boardInst.board[x][y].type == CLAIMEDTILE){
 
+            }
+        }
+    }
+    
     return 1;
+}
+
+void gtObserver::monteCarloStore(uint32_t choice){
+    
+    uint32_t* num = new uint32_t;
+    
+    file.read((char*)num, 4);
+
+    if(*num == -1){
+        //something has gone wrong
+    }
+    if(choice != *num){
+
+    }
 }

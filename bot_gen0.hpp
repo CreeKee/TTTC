@@ -5,15 +5,13 @@
 #ifndef BOT_G0V0
 #define BOT_G0V0
 
-
 class BotG0{
 
     private:
     gtObserver gameTree;
-
+    
     public:
-
-    BotG0();
+    BotG0(uint32_t playerID);
 
     //all move*'s are assumed to be well initiated versions of move moves[3]
     MoveList getNextAction(MoveList moves);

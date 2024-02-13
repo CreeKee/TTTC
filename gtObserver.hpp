@@ -1,14 +1,33 @@
 #include "includes.h"
 #include "gtNode.hpp"
 #include "MoveList.hpp"
+#include "Brain.hpp"
+#include <iostream>
+#include <fstream>
 
 #ifndef GAME_TREE_OBSERVER
 #define GAME_TREE_OBSERVER
 
+class MCNode{
+    MCNode* nextLevel;
+    MCNode* parent;
+    uint32_t kidCount;
+
+};
+
+class MCTree{
+    MCNode head;
+    MoveList* curMove;
+
+};
+
+
+
 class gtObserver{
     public:
     gtNode* head;
-    
+    std::fstream file;
+    Brain brian;
 
     gtObserver();
 
@@ -44,6 +63,8 @@ class gtObserver{
         }
 
     }
+
+    void monteCarloStore(uint32_t choice);
 };
 
 

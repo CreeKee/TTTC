@@ -57,7 +57,7 @@
 #define SKIPCHOICE 4
 #define NULLACTION -1
 
-
+#define GRANULARITY 1000.0
 
 
 
@@ -83,8 +83,17 @@
 #ifndef INCLUDES
 #define INCLUDES
 
-
-
+/*
+struct boardData{
+    uint32_t emptyTiles;
+    uint32_t blockedTiles;
+    bool wincon;
+    bool losecon;
+    
+    uint32_t openPair[2];
+    uint32_t
+};
+*/
 struct move{
     uint32_t action;
     int32_t x;

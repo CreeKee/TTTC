@@ -66,6 +66,25 @@
         "vector": "cpp",
         "random": "cpp",
         "deque": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "charconv": "cpp",
+        "codecvt": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "condition_variable": "cpp",
+        "format": "cpp",
+        "iomanip": "cpp",
+        "numbers": "cpp",
+        "numeric": "cpp",
+        "queue": "cpp",
+        "semaphore": "cpp",
+        "span": "cpp",
+        "stack": "cpp",
+        "variant": "cpp",
+        "memory_resource": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "cinttypes": "cpp"
     }
 }

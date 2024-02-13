@@ -4,7 +4,7 @@ GLFLAGS = -lglfw -framework CoreVideo -framework OpenGL -framework IOKit -framew
 
 EXECUTABLE = TTTC
 
-SOURCES = glad.o WindowManager.o FieldManager.o GameMaster.o MoveList.o bot_gen0.o tlist.o gtObserver.o gtNode.o boardInstance.o
+SOURCES = glad.o WindowManager.o FieldManager.o GameMaster.o MoveList.o bot_gen0.o tlist.o gtObserver.o gtNode.o boardInstance.o Brain.o
 .PHONY: $(SOURCES)
 
 all: $(SOURCES)
@@ -39,6 +39,9 @@ gtNode.o:
 
 boardInstance.o:
 	$(CC) $(CFLAGS) -c boardInstance.cpp
+
+Brain.o:
+	$(CC) $(CFLAGS) -c Brain.cpp
 
 clean:
 	rm *.out
