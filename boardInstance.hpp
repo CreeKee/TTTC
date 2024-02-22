@@ -20,14 +20,14 @@ class boardInstance{
     MoveList diff;
     uint32_t diffDex;
 
-    boardInstance(){board = nullptr;}
+    boardInstance();
     boardInstance(tile** oldboard, uint32_t newx, uint32_t newy, uint32_t xshift, uint32_t yshift, MoveList oldDiff, uint32_t oldDDex);
     ~boardInstance(){
         //fprintf(stderr,"boardInst destruct\n");
         for(int col = 0; col < x_lim; col++){
-            //if(board[col]) free(board[col]);
+            //delete board[col];
         }
-        //if(board) free(board);
+        //delete board;
     }
 
     tlist getAllMoves(int32_t actType);
@@ -54,9 +54,9 @@ class boardInstance{
         )
     }
 
-
+    bool makeMove(uint32_t actType, coord crds, uint32_t curPlayer);
     
-
+    void displayBoard();
 };
 
 #endif

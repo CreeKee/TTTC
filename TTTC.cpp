@@ -21,6 +21,8 @@ void displayMove(MoveList moves){
     for(int i = 0; i<moves.moveDex; i++){
         fprintf(stderr,"%d@(%d, %d) | ",moves.moves[i].action, moves.moves[i].x, moves.moves[i].y);
     }
+
+    fprintf(stderr,"\n");
 }
 
 int main(int argc, char** argv){
@@ -30,6 +32,7 @@ int main(int argc, char** argv){
     int winner = -1;
     bool winmsg = false;
     MoveList moves;
+    uint32_t movenum = 0;
 
     BotG0* players[2] = {new BotG0(0, "weights1.txt"), new BotG0(1, "weights1.txt")};
     bool curplayer = 1;
@@ -37,19 +40,35 @@ int main(int argc, char** argv){
     GameMaster gamemast(2);
     gamemast.startGame();
 
+    players[0]->displayWeights();
+
     fprintf(stderr, "game has been started\n");
 
     moves = players[0]->getNextAction();
     displayMove(moves);
     
     fprintf(stderr, "\n\nsubmitting first move\n");
-
-    while(winner = gamemast.takeTurn(moves)){
+    
+    
+    if((winner = gamemast.takeTurn(moves)) == -1){
+        gamemast.displayBoard();
+        fprintf(stderr, "move number: %d\n\n",movenum++);
+        
+        
         fprintf(stderr, "getting next action\n");
         moves = players[curplayer]->getNextAction(moves);
+        
+        gamemast.takeTurn(moves);
         displayMove(moves);
+        gamemast.displayBoard();
+        
+
+        fprintf(stderr, "move number: %d\n\n",movenum++);
         curplayer = !curplayer;
     }
+
+    fprintf(stderr, "winner is %d\n",winner);
+
     /*
     WindowManager winman;
     FieldManager fieldman((((float)WIDTH)/HEIGHT));
@@ -85,7 +104,6 @@ int main(int argc, char** argv){
     winman.end();
 
 */
-    fprintf(stderr, "finished creating bot\n");
     
     /*
     //get and display first move--------------------

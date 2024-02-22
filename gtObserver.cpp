@@ -1,4 +1,5 @@
 #include "gtObserver.hpp"
+#include "limits.h"
 
 gtObserver::gtObserver(){
     fprintf(stderr,"observer constructor\n");
@@ -59,9 +60,11 @@ void gtObserver::updateBoard(MoveList mvl){
 MoveList gtObserver::getBestAction(){
     
     gtNode* newhead;
-    fprintf(stderr, "getting best child at index %d out of %d kids\n", head->goldenIndex, head->childCount);
+    bool doMax = true;
+    fprintf(stderr, "getting best child at index %d out of %d kids. was max? %d\n", head->goldenIndex, head->childCount, head->wasmax);
     if(head->isleaf) for(int depth = 0; depth < DEPTH; depth++){
-        computeLayer(false);
+        computeLayer(doMax);
+        doMax = !doMax;
     }
     return head->children[head->goldenIndex]->boardInst.diff;
 }
@@ -76,20 +79,19 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
     static int compute_count = 0;
 
     int32_t val;
-    int32_t bestVal = 0;
+    int32_t bestVal = doMax == true ? INT_MIN : INT_MAX;
     int32_t hardwin = 0;
     gtNode* bestChild;
 
-    uint32_t choice = 0;
+    uint32_t choice = 2;
     
     //fprintf(stderr,"beginning computation at depth %d, count =  %d\n", depth, compute_count++);
-    
+    curNode->wasmax = doMax;
     if(depth >= DEPTH){
         return 0;
     }
 
-    if(curNode->isleaf && (!curNode->atrophy || curNode == head)){
-        
+    if(curNode->isleaf ){
         curNode->isleaf = false;
         curNode->atrophy = false;
 
@@ -102,47 +104,55 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
         //fprintf(stderr, "finished placing 3\n");
 
         for(uint32_t child = 0; child < curNode->childCount && !(hardwin); child++){
-
             //evaluate all newely generated children
-            curNode->children[child]->value = brian.evaluate(curNode->children[child]->boardInst, &hardwin);
-            if(doMax && (curNode->children[child]->value > bestVal || hardwin == 1)){
-                bestVal = val;
-                choice = child;
-            }
-            else if(!doMax && (curNode->children[child]->value < bestVal || hardwin == -1)){
-                bestVal = val;
-            }
-            
+            val = brian.evaluate(curNode->children[child]->boardInst, &hardwin);
+            curNode->children[child]->value = val;            
         }
 
-        for(uint32_t child = 0; child < curNode->childCount; child++){
-            if(doMax && curNode->children[child]->value <= ATROPHYRATIO * bestVal){
-                curNode->children[child]->atrophy = true;
-            }
-            else if(!doMax && curNode->children[child]->value >= ATROPHYRATIO * bestVal){
-                curNode->children[child]->atrophy = true;
-            }
-        }
-
-        //fprintf(stderr, "finished evaluating\n");
-        if(doMax && PRUNING || (doMax && hardwin) || true){
-            curNode->goldenChild(choice);
-        }
-        //fprintf(stderr, "finished pruning\n");
+        //propogate values to parents
         curNode->children[0]->backprop(doMax, true);
-        //fprintf(stderr, "finished backprop\n");
         for(uint32_t child = 1; child < curNode->childCount; child++){
             curNode->children[child]->backprop(doMax);
         }
-
     }
     else{
         for(uint32_t child = 0; child < curNode->childCount; child++){
             if(!curNode->children[child]->atrophy) bestVal = computeLayer((curNode->children[child]), !doMax, depth+1);
+
+
         }
     }
 
-    //fprintf(stderr, "finished expanding layer\n");
+    for(uint32_t child = 0; child < curNode->childCount; child++){
+
+        //get value from current node
+        val = curNode->children[child]->value;
+
+        
+        if(doMax && (val > bestVal || hardwin == 1)){
+            bestVal = val;
+            choice = child;
+        }
+        else if(!doMax && (val < bestVal || hardwin == -1)){
+            bestVal = val;
+        }
+
+        if(doMax && val <= ATROPHYRATIO * bestVal){
+            curNode->children[child]->atrophy = true;
+        }
+        else if(!doMax && val >= ATROPHYRATIO * bestVal){
+            curNode->children[child]->atrophy = true;
+        }
+    }
+
+    //store index of best child
+    if(doMax && PRUNING || (doMax && hardwin) || true){
+        curNode->goldenChild(choice);
+    }
+    
+
+    if(choice == 2) fprintf(stderr, "choice is 2, bestVal is %d doMax is %d from player %d\n",bestVal, doMax, brian.playerID);
+
 
     return bestVal;
 }

@@ -17,7 +17,6 @@ BotG0::BotG0(uint32_t playerID){
 
     for(int d = 0; d < DEPTH; d++){
         gameTree.computeLayer(doMax);
-        doMax = !doMax;
     }
 
     //gameTree.traverse();
@@ -31,11 +30,10 @@ BotG0::BotG0(uint32_t playerID, char* filename){
     gameTree.brian.setPlayerID(playerID);
     gameTree.brian.readWeights(filename);
 
-    if(DBG) fprintf(stderr,"bot constructor\n");
+    fprintf(stderr,"bot constructor for player %d\n",playerID);
 
     for(int d = 0; d < DEPTH; d++){
         gameTree.computeLayer(doMax);
-        doMax = !doMax;
     }
 
     //gameTree.traverse();
@@ -51,8 +49,8 @@ MoveList BotG0::getNextAction(MoveList mvl){
 
     moves = gameTree.getBestAction();
     gameTree.updateBoard(moves);
-    gameTree.computeLayer(true);
-    gameTree.computeLayer(true);
+    gameTree.computeLayer(false);
+    gameTree.computeLayer(false);
     //gameTree.computeLayer((gameTree.head), false);
     return moves;
 }

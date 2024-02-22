@@ -15,6 +15,7 @@ class gtNode{
     bool atrophy;
     boardInstance boardInst;
     uint32_t goldenIndex;
+    bool wasmax;
     
     gtNode(){children = nullptr; parent = nullptr; value = 0;}
     gtNode(boardInstance incBoard, gtNode* prev);

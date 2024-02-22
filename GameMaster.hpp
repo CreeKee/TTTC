@@ -1,6 +1,7 @@
 #include "includes.h"
 #include "WindowManager.hpp"
 #include "MoveList.hpp"
+#include "boardInstance.hpp"
 
 #ifndef FMINC
 #define FMINC
@@ -8,8 +9,8 @@
 #endif
 
 #define UPDATEDIMS x = x+zset*RATIO; y = y+zset
-#define CHECKEXIST (field != nullptr) && (field[x] != nullptr) && (x < fieldSize) && (x >= 0) && (y < fieldSize) && (y >= 0) 
-#define INFIELD(a,b) ((a) < fieldSize) && ((a) >= 0) && ((b) < fieldSize) && ((b) >= 0) && field[a][b].owner == curPlayer
+#define CHECKEXIST (boardInst.board != nullptr) && (field[x] != nullptr) && (x < fieldSize) && (x >= 0) && (y < fieldSize) && (y >= 0) 
+#define INFIELD(a,b)  boardInst.board[a+(boardInst.x_lim>>1)][b+(boardInst.y_lim>>1)].owner == curPlayer
 #define UPDATELIMS if(x > lim.xmax) lim.xmax = x; else if(x < lim.xmin) lim.xmin = x;\
                    if(y > lim.ymax) lim.ymax = y; else if(y < lim.ymin) lim.ymin = y;
 
@@ -26,14 +27,12 @@ class GameMaster{
     MoveList prevmoves;
     uint8_t movedex;
 
-    tile** field;
+    boardInstance boardInst;
 
     float ratio;
     float tileOffset;
     float lineWidth;
     
-    uint64_t fieldSize;
-    uint32_t zset;
     WindowManager* WM;
     FieldManager* FM;
 
@@ -44,11 +43,11 @@ class GameMaster{
 
     
 
-    bool claimTile(int x, int y);
-    bool placeEmptyTile(int x, int y);
-    bool blockTile(int x, int y);
+    bool claimTile(coord crds);
+    bool placeEmptyTile(coord crds);
+    bool blockTile(coord crds);
 
-    bool checkWinCon(int x, int y);
+    bool checkWinCon(coord crds);
 
     public:
     GameMaster(int numPlayers);
@@ -57,7 +56,6 @@ class GameMaster{
         
         if(FM != nullptr) FM->placeTile(INITDIM*2, INITDIM);
         if(FM != nullptr) FM->blockTile(INITDIM*2, INITDIM);
-        field[INITDIM*2][INITDIM].type = BLOCKEDTILE;
 
         std::cout << std::endl << 
             "it is player " << curPlayer+1 <<
@@ -69,7 +67,7 @@ class GameMaster{
     }
 
     bool checkChoice(int choice);
-    bool gameAction(int action, int x, int y, int* winner);
+    bool gameAction(int action, coord crds, int* winner);
     int getPlayerChoice();
     coord getDesiredTile(); 
 
@@ -78,12 +76,13 @@ class GameMaster{
     void setWM(WindowManager* newWM){WM = newWM;}
     void setFM(FieldManager* newFM){FM = newFM;}
 
-    tile getTile(int x, int y);
-    tile** getField(){return field;}
+    tile getTile(coord crds);
+    tile** getField(){return boardInst.board;}
 
     MoveList getCurMoves(){return curmoves;}
     MoveList getPrevMoves(){return prevmoves;}
 
+    void displayBoard(){boardInst.displayBoard();}
     //void readkeys(GLFWwindow* window, int key, int scancode, int action, int mods);
 };
 

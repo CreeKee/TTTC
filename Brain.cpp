@@ -23,6 +23,21 @@ void Brain::readWeights(char* filename){
     file.open(filename);
     file.read((char*)(&weights), sizeof(float)*PRECEPTCOUNT);
     file.close();
+
+    //TODO temporary biasing
+    float* weight = (float*)(&weights);
+    for(int curW = 2; curW < 6; curW++){
+        weight[curW] += 100;
+    }
+    for(int curW = 6; curW < 10; curW++){
+        weight[curW] -= 10;
+    }
+    for(int curW = 10; curW < 14; curW++){
+        weight[curW] += 100;
+    }
+    for(int curW = 14; curW < 18; curW++){
+        weight[curW] -= 10;
+    }
 }
 
 void Brain::scrambleWeights(){
@@ -30,14 +45,13 @@ void Brain::scrambleWeights(){
     float* weight = (float*)(&weights);
     std::random_device dev;
     std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> dist6(0,200); 
+    std::uniform_int_distribution<std::mt19937::result_type> dist6(0,2000); 
 
     float rand;
 
     for(int curW = 0; curW < PRECEPTCOUNT; curW++){
-        rand = (dist6(rng)/GRANULARITY) - .1;
+        rand = (dist6(rng)/GRANULARITY) - 1;
         weight[curW] += rand;
-        
     }
 }
 
@@ -49,7 +63,7 @@ int32_t Brain::evaluate(boardInstance boardInst, int32_t* hardwin){
     float* curWeight = (float*)(&weights);
     uint32_t* curPrecept = (uint32_t*)(&vals);
 
-    for(int mv = 0; mv < PRECEPTCOUNT; mv++){
+    for(int mv = 0; mv < PRECEPTCOUNT; mv++){ 
         val += (curWeight[mv])*(curPrecept[mv]);
     }
     if(vals.win > 0){

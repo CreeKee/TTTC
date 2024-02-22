@@ -8,128 +8,101 @@ GameMaster::GameMaster(int numPlayers){
     
     FM = nullptr;
 
-    fieldSize = INITDIM*8+1;
-    zset = INITDIM;
-    field = (tile**)calloc(sizeof(tile*), (fieldSize));
-
-    for(int rows = 0; rows < fieldSize; rows++){
-        field[rows] = (tile*)calloc(sizeof(tile), (fieldSize));
-        for(int cols = 0; cols <fieldSize; cols++){
-            field[rows][cols].owner = -1;
-        }
-    }
-
-    lim.xmax = 0;
-    lim.xmin = fieldSize;
-    lim.xmax = 0;
-    lim.xmin = fieldSize;
-
     curPlayer = 0;
 
     movedex = 0;
 
 }
 
-bool GameMaster::claimTile(int x, int y){
+bool GameMaster::claimTile(coord crds){
 
     bool ret = false;
 
-    if(CHECKEXIST && field[x][y].type == EMPTYTILE){
-        field[x][y].type = CLAIMEDTILE;
-        field[x][y].owner = curPlayer;
-
-        if(FM != nullptr) FM->claimTile(x, y, curPlayer);
-
+    if((ret = boardInst.makeMove(CLAIMEDTILE, crds, curPlayer) == true)){
+        if(FM != nullptr) FM->claimTile(crds.x, crds.y, curPlayer);
         freeTiles--;
-        ret = true;
     }
 
     return ret;
 
 }
 
-bool GameMaster::blockTile(int x, int y){
+bool GameMaster::blockTile(coord crds){
 
     bool ret = false;
-    fprintf(stderr, "tile %d %d is of type %d\n",x,y,field[x][y].type);
-    if(CHECKEXIST && field[x][y].type == EMPTYTILE){
-        field[x][y].type = BLOCKEDTILE;
-        if(FM != nullptr) FM->blockTile(x, y);
+
+    if((ret = boardInst.makeMove(BLOCKEDTILE, crds, curPlayer) == true)){
+        if(FM != nullptr) FM->blockTile(crds.x, crds.y);
         freeTiles--;
-        ret = true;
     }
 
     return ret;
 
 }
 
-bool GameMaster::placeEmptyTile(int x, int y){
+bool GameMaster::placeEmptyTile(coord crds){
 
     bool ret = false;
-    fprintf(stderr, "tile %d %d is of type %d\n",x,y,field[x][y].type);
-    if(CHECKEXIST && field[x][y].type == NULLTILE){
-        if((x<fieldSize && field[x+1][y].type != NULLTILE) || (x>0 && field[x-1][y].type != NULLTILE) || (y<fieldSize && field[x][y+1].type != NULLTILE) || (y>0 && field[x][y-1].type != NULLTILE)){
-            field[x][y].type = EMPTYTILE;
-            if(FM != nullptr) FM->placeTile(x, y);
-            freeTiles++;
-            ret = true;
-        }
-        
+    //fprintf(stderr, "tile %d %d is of type %d\n",x,y,boardInst.board[x][y].type);
+
+    if((ret = boardInst.makeMove(EMPTYTILE, crds, curPlayer) == true)){
+        if(FM != nullptr) FM->placeTile(crds.x, crds.y);
+        freeTiles++;
     }
     
     return ret;
 }
 
-bool GameMaster::checkWinCon(int x, int y){
+bool GameMaster::checkWinCon(coord crds){
 
     int lined = 0;
     bool ret = false;
 
-    if(INFIELD(x-1,y)){
+    if(INFIELD(crds.x-1,crds.y)){
         lined++;
-        if(INFIELD(x-2,y)) lined++;
+        if(INFIELD(crds.x-2,crds.y)) lined++;
     }
-    if(INFIELD(x+1,y)){
+    if(INFIELD(crds.x+1,crds.y)){
         lined++;
-        if(INFIELD(x+2,y)) lined++;
+        if(INFIELD(crds.x+2,crds.y)) lined++;
     }
     ret = (lined >= 2);
     lined = 0;  
 
     if(!ret){
-        if( INFIELD(x,y-1)){
+        if( INFIELD(crds.x,crds.y-1)){
             lined++;
-            if(INFIELD(x,y-2)) lined++;
+            if(INFIELD(crds.x,crds.y-2)) lined++;
         }
-        if(INFIELD(x,y+1)){
+        if(INFIELD(crds.x,crds.y+1)){
             lined++;
-            if(INFIELD(x,y+2)) lined++;
-        }
-        ret = (lined >= 2);
-        lined = 0;  
-    }
-
-    if(!ret){
-        if( INFIELD(x-1,y-1)){
-            lined++;
-            if(INFIELD(x-2,y-2)) lined++;
-        }
-        if(INFIELD(x+1,y+1)){
-            lined++;
-            if(INFIELD(x+2,y+2)) lined++;
+            if(INFIELD(crds.x,crds.y+2)) lined++;
         }
         ret = (lined >= 2);
         lined = 0;  
     }
 
     if(!ret){
-        if( INFIELD(x+1,y-1)){
+        if( INFIELD(crds.x-1,crds.y-1)){
             lined++;
-            if(INFIELD(x+2,y-2)) lined++;
+            if(INFIELD(crds.x-2,crds.y-2)) lined++;
         }
-        if(INFIELD(x-1,y+1)){
+        if(INFIELD(crds.x+1,crds.y+1)){
             lined++;
-            if(INFIELD(x-2,y+2)) lined++;
+            if(INFIELD(crds.x+2,crds.y+2)) lined++;
+        }
+        ret = (lined >= 2);
+        lined = 0;  
+    }
+
+    if(!ret){
+        if( INFIELD(crds.x+1,crds.y-1)){
+            lined++;
+            if(INFIELD(crds.x+2,crds.y-2)) lined++;
+        }
+        if(INFIELD(crds.x-1,crds.y+1)){
+            lined++;
+            if(INFIELD(crds.x-2,crds.y+2)) lined++;
         }
         ret = (lined >= 2);
         lined = 0;  
@@ -138,7 +111,7 @@ bool GameMaster::checkWinCon(int x, int y){
     return ret;
 }
 
-bool GameMaster::gameAction(int action, int x, int y, int* winner){
+bool GameMaster::gameAction(int action, coord crds, int* winner){
 
     bool ret = false;
 
@@ -146,19 +119,19 @@ bool GameMaster::gameAction(int action, int x, int y, int* winner){
 
     switch(action){
         case CLAIM:
-            if(ret = claimTile(x, y)){
-                if(checkWinCon(x, y)){
+            if(ret = claimTile(crds)){
+                if(checkWinCon(crds)){
                     *winner = curPlayer; 
                 }
             }
             break;
 
         case PLACE:
-            ret = placeEmptyTile(x,y);
+            ret = placeEmptyTile(crds);
             break;
 
         case BLOCK:
-            ret = blockTile(x,y);
+            ret = blockTile(crds);
             break;
 
         default:
@@ -166,8 +139,7 @@ bool GameMaster::gameAction(int action, int x, int y, int* winner){
     }
 
     if(ret){
-        UPDATELIMS;
-        curmoves.addMove(action, x, y);
+        curmoves.addMove(action, crds.x, crds.y);
     }
 
     return ret;
@@ -194,7 +166,7 @@ int GameMaster::takeTurn(){
                 pos = getDesiredTile();
                 
                 if(pos.x >= 0 && pos.y >= 0){
-                    if(gameAction(PLACE, pos.x, pos.y, &winner)){
+                    if(gameAction(PLACE, pos, &winner)){
                         printf("wee %d %d %d\n", select, steps, phase);
                         steps--;
                         phase = ACTIVE;
@@ -211,7 +183,7 @@ int GameMaster::takeTurn(){
                 
                 pos = getDesiredTile();
                 if(pos.x >= 0 && pos.y >= 0){
-                    if(gameAction(BLOCK, pos.x, pos.y, &winner)){
+                    if(gameAction(BLOCK, pos, &winner)){
                         steps--;
                         phase = ACTIVE;
                     }
@@ -232,7 +204,7 @@ int GameMaster::takeTurn(){
 
                 pos = getDesiredTile();
                 if(pos.x >= 0 && pos.y >= 0){
-                    if(gameAction(CLAIM, pos.x, pos.y, &winner)){
+                    if(gameAction(CLAIM, pos, &winner)){
                         steps--;
                         phase = ACTIVE;
                     } 
@@ -247,7 +219,7 @@ int GameMaster::takeTurn(){
                 if(steps == 2){
                     pos = getDesiredTile();
                     if(pos.x >= 0 && pos.y >= 0){
-                        if(gameAction(PLACE, pos.x, pos.y, &winner)){
+                        if(gameAction(PLACE, pos, &winner)){
                             steps--;
                             phase = ACTIVE;
                         }
@@ -256,7 +228,7 @@ int GameMaster::takeTurn(){
                 else if(steps == 1){
                     pos = getDesiredTile();
                     if(pos.x >= 0 && pos.y >= 0){
-                        if(gameAction(BLOCK, pos.x, pos.y, &winner)) steps--;
+                        if(gameAction(BLOCK, pos, &winner)) steps--;
                     }
                 }
                 if(steps == 0) phase = END;
@@ -307,18 +279,25 @@ int GameMaster::takeTurn(MoveList moves){
 
     int winner = -1;
 
+    coord crds;
+    
+
     for(int move = 0; move < moves.moveDex; move++){
+
+        crds.x = moves.moves[move].x;
+        crds.y = moves.moves[move].y;
+
         switch(moves.moves[move].action){
             case EMPTYTILE:
-                if(!gameAction(PLACE, moves.moves[move].x + (fieldSize>>1), moves.moves[move].y+ (fieldSize>>1), &winner)) fprintf(stderr, "Illegal place tile action taken\n");
+                if(!gameAction(PLACE, crds, &winner)) fprintf(stderr, "Illegal place tile action taken\n");
             break;
             
             case BLOCKEDTILE:
-                if(!gameAction(BLOCK, moves.moves[move].x+ (fieldSize>>1), moves.moves[move].y+ (fieldSize>>1), &winner)) fprintf(stderr, "Illegal block tile action taken\n");
+                if(!gameAction(BLOCK, crds, &winner)) fprintf(stderr, "Illegal block tile action taken\n");
             break;
 
             case CLAIMEDTILE:
-                if(!gameAction(CLAIM, moves.moves[move].x+ (fieldSize>>1), moves.moves[move].y+ (fieldSize>>1), &winner)) fprintf(stderr, "Illegal claim tile action taken\n");
+                if(!gameAction(CLAIM, crds, &winner)) fprintf(stderr, "Illegal claim tile action taken\n");
             break;
         }
     }
