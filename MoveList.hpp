@@ -36,14 +36,18 @@ class MoveList{
         bool find = false;
 
         for(int i = 0; i < 3 && ret; i++){
-            
+            //fprintf(stderr,"%d %d %d / ",moves[i].action, moves[i].x, moves[i].y);
             for(int j = 0; j < 3 && find == false; j++){
-
-                find = M.moves[j].action != NULLACTION && moves[i].action != NULLACTION &&
+                
+                find = 
+                M.moves[j].action != NULLACTION && 
+                moves[i].action != NULLACTION &&
                 (M.moves[j].action == moves[i].action) &&
                 (M.moves[j].x == moves[i].x) &&
                 (M.moves[j].y == moves[i].y);
+                //fprintf(stderr,"%d %d %d | ",M.moves[j].action, M.moves[j].x, M.moves[j].y);
             }
+            //fprintf(stderr, "find == %d\n",find);
             ret = find;
             find = false;
         }

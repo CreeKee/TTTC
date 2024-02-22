@@ -7,14 +7,17 @@
 class gtNode{
     public:
     gtNode** children;
+    gtNode* parent;
+    int32_t value;
     uint32_t childCount;
     uint32_t maxKids;
     bool isleaf;
+    bool atrophy;
     boardInstance boardInst;
     uint32_t goldenIndex;
     
-    gtNode(){children = nullptr;}
-    gtNode(boardInstance incBoard);
+    gtNode(){children = nullptr; parent = nullptr; value = 0;}
+    gtNode(boardInstance incBoard, gtNode* prev);
     ~gtNode(){
         //fprintf(stderr, "gtNode destructor\n");
 
@@ -23,6 +26,26 @@ class gtNode{
                 delete children[kid];
             }
             free(children);
+        }
+    }
+
+    void backprop(bool doMax){
+        if(parent != nullptr){
+            if(doMax){
+                if(value > parent->value){
+                    parent->value = value;
+                }
+            }
+            else if(value < parent->value){
+                parent->value = value;
+            }
+            parent->backprop(!doMax);
+        }
+    }
+    void backprop(bool doMax, bool force){
+        if(parent != nullptr){
+            parent->value = value;
+            parent->backprop(!doMax);
         }
     }
 

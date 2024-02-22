@@ -52,9 +52,6 @@ tlist boardInstance::getAllMoves(int32_t actType){
                         board[x][y-1].type = ADJTILE;
                     }
                 }
-                
-                
-                
 
             )
 

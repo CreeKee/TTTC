@@ -15,7 +15,7 @@
 #ifndef BRAIN_NN
 #define BRAIN_NN
 
-struct precepts{
+struct __attribute__ ((packed)) precepts{
     uint32_t openness;
     uint32_t surface;
 
@@ -43,7 +43,7 @@ struct precepts{
     uint32_t lose;
 };
 
-struct preceptWeights{
+struct __attribute__ ((packed)) preceptWeights{
     float openness;
     float surface;
 
@@ -86,6 +86,8 @@ class Brain{
     void scrambleWeights();
 
     void setPlayerID(uint32_t newid){playerID = newid;}
+
+    void displayWeights(){for(int i = 0; i<PRECEPTCOUNT; i++) fprintf(stderr, "%f\n", ((float*)(&weights))[i]);}
 };
 
 

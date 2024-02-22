@@ -6,6 +6,7 @@ GameMaster::GameMaster(int numPlayers){
     playerCount = numPlayers;
     freeTiles = 0;
     
+    FM = nullptr;
 
     fieldSize = INITDIM*8+1;
     zset = INITDIM;
@@ -37,7 +38,7 @@ bool GameMaster::claimTile(int x, int y){
         field[x][y].type = CLAIMEDTILE;
         field[x][y].owner = curPlayer;
 
-        FM->claimTile(x, y, curPlayer);
+        if(FM != nullptr) FM->claimTile(x, y, curPlayer);
 
         freeTiles--;
         ret = true;
@@ -53,7 +54,7 @@ bool GameMaster::blockTile(int x, int y){
     fprintf(stderr, "tile %d %d is of type %d\n",x,y,field[x][y].type);
     if(CHECKEXIST && field[x][y].type == EMPTYTILE){
         field[x][y].type = BLOCKEDTILE;
-        FM->blockTile(x, y);
+        if(FM != nullptr) FM->blockTile(x, y);
         freeTiles--;
         ret = true;
     }
@@ -69,7 +70,7 @@ bool GameMaster::placeEmptyTile(int x, int y){
     if(CHECKEXIST && field[x][y].type == NULLTILE){
         if((x<fieldSize && field[x+1][y].type != NULLTILE) || (x>0 && field[x-1][y].type != NULLTILE) || (y<fieldSize && field[x][y+1].type != NULLTILE) || (y>0 && field[x][y-1].type != NULLTILE)){
             field[x][y].type = EMPTYTILE;
-            FM->placeTile(x, y);
+            if(FM != nullptr) FM->placeTile(x, y);
             freeTiles++;
             ret = true;
         }
@@ -298,6 +299,30 @@ int GameMaster::takeTurn(){
         }
 
     }
+
+    return winner;
+}
+
+int GameMaster::takeTurn(MoveList moves){
+
+    int winner = -1;
+
+    for(int move = 0; move < moves.moveDex; move++){
+        switch(moves.moves[move].action){
+            case EMPTYTILE:
+                if(!gameAction(PLACE, moves.moves[move].x + (fieldSize>>1), moves.moves[move].y+ (fieldSize>>1), &winner)) fprintf(stderr, "Illegal place tile action taken\n");
+            break;
+            
+            case BLOCKEDTILE:
+                if(!gameAction(BLOCK, moves.moves[move].x+ (fieldSize>>1), moves.moves[move].y+ (fieldSize>>1), &winner)) fprintf(stderr, "Illegal block tile action taken\n");
+            break;
+
+            case CLAIMEDTILE:
+                if(!gameAction(CLAIM, moves.moves[move].x+ (fieldSize>>1), moves.moves[move].y+ (fieldSize>>1), &winner)) fprintf(stderr, "Illegal claim tile action taken\n");
+            break;
+        }
+    }
+    curPlayer = (curPlayer+1)%playerCount;
 
     return winner;
 }

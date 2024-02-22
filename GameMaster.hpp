@@ -55,8 +55,8 @@ class GameMaster{
 
     void startGame(){
         
-        FM->placeTile(INITDIM*2, INITDIM);
-        FM->blockTile(INITDIM*2, INITDIM);
+        if(FM != nullptr) FM->placeTile(INITDIM*2, INITDIM);
+        if(FM != nullptr) FM->blockTile(INITDIM*2, INITDIM);
         field[INITDIM*2][INITDIM].type = BLOCKEDTILE;
 
         std::cout << std::endl << 
@@ -74,6 +74,7 @@ class GameMaster{
     coord getDesiredTile(); 
 
     int takeTurn();
+    int takeTurn(MoveList moves);
     void setWM(WindowManager* newWM){WM = newWM;}
     void setFM(FieldManager* newFM){FM = newFM;}
 

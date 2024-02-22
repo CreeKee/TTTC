@@ -4,11 +4,11 @@ GLFLAGS = -lglfw -framework CoreVideo -framework OpenGL -framework IOKit -framew
 
 EXECUTABLE = TTTC
 
-SOURCES = glad.o WindowManager.o FieldManager.o GameMaster.o MoveList.o bot_gen0.o tlist.o gtObserver.o gtNode.o boardInstance.o Brain.o
+SOURCES = WindowManager.o FieldManager.o GameMaster.o MoveList.o bot_gen0.o tlist.o gtObserver.o gtNode.o boardInstance.o Brain.o
 .PHONY: $(SOURCES)
 
 all: $(SOURCES)
-	$(CC) $(GLFLAGS) -o tttc TTTC.cpp $(SOURCES)
+	$(CC) $(GLFLAGS) -o tttc TTTC.cpp glad.o $(SOURCES)
 
 glad.o:
 	$(CC) $(CFLAGS) -c glad glad/src/glad.c

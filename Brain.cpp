@@ -35,7 +35,7 @@ void Brain::scrambleWeights(){
     float rand;
 
     for(int curW = 0; curW < PRECEPTCOUNT; curW++){
-        rand = (dist6(rng)/GRANULARITY) - 1;
+        rand = (dist6(rng)/GRANULARITY) - .1;
         weight[curW] += rand;
         
     }
@@ -58,6 +58,7 @@ int32_t Brain::evaluate(boardInstance boardInst, int32_t* hardwin){
     if(vals.lose > 0){
         *hardwin = -1;
     }
+
     return val;
 }
 
@@ -78,7 +79,7 @@ precepts Brain::gatherPrecepts(boardInstance boardInst){
                 if(boardInst.board[x][y].type == ADJTILE){
                     gatherFromAdj(&ps,checked, boardInst, x, y, 0, 0, 0, ADJTILE);
                 }
-                else if(boardInst.board[x][y].type == EMPTYTILE){
+                else if(boardInst.board[x][y].type == EMPTYTILE){                    
                     gatherFromEmpty(&ps,checked, boardInst, x, y, 0, 0, 0, EMPTYTILE);
                 }
             }
@@ -97,6 +98,8 @@ precepts Brain::gatherPrecepts(boardInstance boardInst){
 
 void Brain::gatherFromEmpty(precepts* traits, bool** checkfield, boardInstance boardInst, int x, int y, uint32_t len, int dx, int dy, uint32_t prevType){
 
+    
+    if(!checkfield[x+dx][y+dy]){
     switch(boardInst.board[x+dx][y+dy].type){
         case EMPTYTILE:
             checkfield[x+dx][y+dy] = true;
@@ -112,7 +115,6 @@ void Brain::gatherFromEmpty(precepts* traits, bool** checkfield, boardInstance b
         break;
 
         case CLAIMEDTILE:
-
             if(boardInst.board[x+dx][y+dy].owner == playerID && (prevType == SELFCLAIM || prevType == EMPTYTILE)){
                 checkfield[x+dx][y+dy] = true;
                 if(prevType == EMPTYTILE) len = 0;
@@ -163,12 +165,18 @@ void Brain::gatherFromEmpty(precepts* traits, bool** checkfield, boardInstance b
             }
        
         break;
+        default:
+        break;
+    }
     }
 
 }
 
 void Brain::gatherFromAdj(precepts* traits, bool** checkfield, boardInstance boardInst, int x, int y, uint32_t len, int dx, int dy, uint32_t prevType){
 
+    
+
+    if(!checkfield[x+dx][y+dy]){
     switch(boardInst.board[x+dx][y+dy].type){
         case ADJTILE:
             checkfield[x+dx][y+dy] = true;
@@ -184,7 +192,6 @@ void Brain::gatherFromAdj(precepts* traits, bool** checkfield, boardInstance boa
         break;
 
         case CLAIMEDTILE:
-
             if(boardInst.board[x+dx][y+dy].owner == playerID && (prevType == SELFCLAIM || prevType == ADJTILE)){
                 checkfield[x+dx][y+dy] = true;
                 if(prevType == ADJTILE) len = 0;
@@ -235,6 +242,8 @@ void Brain::gatherFromAdj(precepts* traits, bool** checkfield, boardInstance boa
             }
        
         break;
+        default:
+        break;
     }
-
+    }
 }

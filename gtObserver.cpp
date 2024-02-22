@@ -17,12 +17,13 @@ gtObserver::gtObserver(){
         head->boardInst.board[col] = (tile*)calloc(head->boardInst.y_lim, sizeof(tile));
     }
 
-    head->boardInst.board[3][3].type = BLOCKEDTILE;
+    head->boardInst.board[BOARDINSTINIT>>1][BOARDINSTINIT>>1].type = BLOCKEDTILE;
 
     head->childCount = 0;
     head->maxKids = INITKIDS;
     head->children = (gtNode**)calloc(INITKIDS, sizeof(gtNode*));
     head->isleaf = true;
+    head->atrophy = false;
     
     if(DBG) fprintf(stderr,"END observer constructor %p\n",head);
 
@@ -34,9 +35,11 @@ void gtObserver::updateBoard(MoveList mvl){
     uint32_t kidDex = 0;
     gtNode* newhead;
 
-    while(kidDex < head->childCount && head->children[kidDex] && !(mvl == head->children[kidDex]->boardInst.diff)){
+    while(kidDex < head->childCount-1 && head->children[kidDex] && !(mvl == head->children[kidDex]->boardInst.diff)){
         kidDex++;
     }
+
+    fprintf(stderr,"kidDex == %d out of %d\n",kidDex, head->childCount);
 
     for(uint32_t freekid = 0; freekid < head->childCount; freekid++){
         if(freekid != kidDex){
@@ -45,31 +48,26 @@ void gtObserver::updateBoard(MoveList mvl){
         }
     }
 
-    monteCarloStore(kidDex);
-
     newhead = head->children[kidDex];
     free(head);
     head = newhead;
-
-
+    fprintf(stderr, "finished updating board\n");
+    head->parent = nullptr;
     return;
 }
 
 MoveList gtObserver::getBestAction(){
     
     gtNode* newhead;
-
-    newhead = head->children[head->goldenIndex];
-    free(head);
-    head = newhead;
-
-
-
-    return head->boardInst.diff;
+    fprintf(stderr, "getting best child at index %d out of %d kids\n", head->goldenIndex, head->childCount);
+    if(head->isleaf) for(int depth = 0; depth < DEPTH; depth++){
+        computeLayer(false);
+    }
+    return head->children[head->goldenIndex]->boardInst.diff;
 }
 
 uint32_t gtObserver::computeLayer(bool doMax){
-    if(DBG) fprintf(stderr, "head at %p\n", head);
+    //fprintf(stderr, "head at %p\n", head);
     return computeLayer(head, doMax, 0);
 }
 
@@ -77,18 +75,23 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
 
     static int compute_count = 0;
 
-    uint32_t val;
-    uint32_t bestVal = 0;
+    int32_t val;
+    int32_t bestVal = 0;
     int32_t hardwin = 0;
     gtNode* bestChild;
 
-    uint32_t choice;
+    uint32_t choice = 0;
     
     //fprintf(stderr,"beginning computation at depth %d, count =  %d\n", depth, compute_count++);
     
-    if(curNode->isleaf){
+    if(depth >= DEPTH){
+        return 0;
+    }
+
+    if(curNode->isleaf && (!curNode->atrophy || curNode == head)){
         
         curNode->isleaf = false;
+        curNode->atrophy = false;
 
         //expand all possible positions from the current board
         curNode->expandPlaceThreeEmpty();
@@ -96,53 +99,50 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
         curNode->expandClaimOne();
         curNode->expandPlaceAndBlock();
 
-        if(DBG) fprintf(stderr, "finished placing 3\n");
+        //fprintf(stderr, "finished placing 3\n");
 
-        for(uint32_t child = 0; child < curNode->childCount; child++){
+        for(uint32_t child = 0; child < curNode->childCount && !(hardwin); child++){
 
             //evaluate all newely generated children
-            val = brian.evaluate(curNode->children[child]->boardInst, &hardwin);
-
-            if(bestVal)
-
-
-            //if it will be our turn when the current level is accessed then we predetermine the best move
-            if(doMax){
-
-                //check for best child
-                if(val >= bestVal){
-                    bestVal = val;
-                    bestChild = (curNode->children[child]);
-                    choice = child;
-                    curNode->goldenChild(choice);
-                }
+            curNode->children[child]->value = brian.evaluate(curNode->children[child]->boardInst, &hardwin);
+            if(doMax && (curNode->children[child]->value > bestVal || hardwin == 1)){
+                bestVal = val;
+                choice = child;
             }
+            else if(!doMax && (curNode->children[child]->value < bestVal || hardwin == -1)){
+                bestVal = val;
+            }
+            
+        }
 
-            //compute all children because we dont know if our opponent is optimal
-            else{
-                //val = computeLayer((curNode->children[child]), !doMax, depth+1);
-                /*if(val <= bestVal){
-                    bestVal = val;
-                    bestChild = (curNode->children[child]);
-                    choice = child;
-                    curNode->goldenChild(choice);
-                }
-                bestChild = (curNode->children[child]);*/
+        for(uint32_t child = 0; child < curNode->childCount; child++){
+            if(doMax && curNode->children[child]->value <= ATROPHYRATIO * bestVal){
+                curNode->children[child]->atrophy = true;
+            }
+            else if(!doMax && curNode->children[child]->value >= ATROPHYRATIO * bestVal){
+                curNode->children[child]->atrophy = true;
             }
         }
 
-        //alpha pruning (no beta pruning)
-        if(doMax && PRUNING){
+        //fprintf(stderr, "finished evaluating\n");
+        if(doMax && PRUNING || (doMax && hardwin) || true){
             curNode->goldenChild(choice);
         }
+        //fprintf(stderr, "finished pruning\n");
+        curNode->children[0]->backprop(doMax, true);
+        //fprintf(stderr, "finished backprop\n");
+        for(uint32_t child = 1; child < curNode->childCount; child++){
+            curNode->children[child]->backprop(doMax);
+        }
+
     }
     else{
         for(uint32_t child = 0; child < curNode->childCount; child++){
-            bestVal = computeLayer((curNode->children[child]), !doMax, depth+1);
+            if(!curNode->children[child]->atrophy) bestVal = computeLayer((curNode->children[child]), !doMax, depth+1);
         }
     }
 
-    if(DBG) fprintf(stderr, "finished expanding layer\n");
+    //fprintf(stderr, "finished expanding layer\n");
 
     return bestVal;
 }

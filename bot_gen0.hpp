@@ -9,12 +9,21 @@ class BotG0{
 
     private:
     gtObserver gameTree;
+    bool doMax;
     
     public:
     BotG0(uint32_t playerID);
+    BotG0(uint32_t playerID, char* filename);
 
     //all move*'s are assumed to be well initiated versions of move moves[3]
     MoveList getNextAction(MoveList moves);
+    MoveList getNextAction();
+
+    void updateWeights(){gameTree.brian.scrambleWeights();}
+    void saveWeights(char* filename){gameTree.brian.storeWeights(filename);}
+    void readWeights(char* filename){gameTree.brian.readWeights(filename);}
+    void displayWeights(){gameTree.brian.displayWeights();fprintf(stderr,"\n");}
+    
 
 };
 

@@ -11,7 +11,17 @@
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 
-int getPlayerOption();
+void displayMove(MoveList moves){
+
+    //display info about the move
+    fprintf(stderr,"\nmove count: ");
+    fprintf(stderr,"%d\n",moves.moveDex);
+
+    //display the move itself
+    for(int i = 0; i<moves.moveDex; i++){
+        fprintf(stderr,"%d@(%d, %d) | ",moves.moves[i].action, moves.moves[i].x, moves.moves[i].y);
+    }
+}
 
 int main(int argc, char** argv){
     position p;
@@ -19,8 +29,27 @@ int main(int argc, char** argv){
     int b = 0;
     int winner = -1;
     bool winmsg = false;
+    MoveList moves;
 
-    BotG0 bot;
+    BotG0* players[2] = {new BotG0(0, "weights1.txt"), new BotG0(1, "weights1.txt")};
+    bool curplayer = 1;
+
+    GameMaster gamemast(2);
+    gamemast.startGame();
+
+    fprintf(stderr, "game has been started\n");
+
+    moves = players[0]->getNextAction();
+    displayMove(moves);
+    
+    fprintf(stderr, "\n\nsubmitting first move\n");
+
+    while(winner = gamemast.takeTurn(moves)){
+        fprintf(stderr, "getting next action\n");
+        moves = players[curplayer]->getNextAction(moves);
+        displayMove(moves);
+        curplayer = !curplayer;
+    }
     /*
     WindowManager winman;
     FieldManager fieldman((((float)WIDTH)/HEIGHT));
@@ -56,13 +85,31 @@ int main(int argc, char** argv){
     winman.end();
 
 */
+    fprintf(stderr, "finished creating bot\n");
     
-    fprintf(stderr, "ending main\n");
-    return 0;
-}
+    /*
+    //get and display first move--------------------
+    moves = bot.getNextAction();
+    displayMove(moves);
+    
+    //get and display second move--------------------
+    moves = bot.getNextAction(moves);
+    displayMove(moves);
 
-int getPlayerOption(){
-    //wait until key input
+    //get and display third move--------------------
+    moves = bot.getNextAction(moves);
+    displayMove(moves);
+
+    for(int i = 0; i<20; i++){
+        fprintf(stderr, "doing action #%d\n", i);
+        moves = bot.getNextAction(moves);
+        displayMove(moves);
+    }
+    
+    bot.updateWeights();
+    bot.saveWeights("weights1.txt");
+    */
+    fprintf(stderr, "ending main\n");
     return 0;
 }
 

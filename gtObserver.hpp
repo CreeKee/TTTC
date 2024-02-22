@@ -46,17 +46,17 @@ class gtObserver{
     void traverse(){
         fprintf(stderr, "doing traverse across %d\n", head->childCount);
 
-        //DISPLAYBOARD(fprintf(stderr, "%d", head->boardInst.board[x][y].type))
+        DISPLAYBOARD(head->boardInst.x_lim, head->boardInst.y_lim,fprintf(stderr, "%d", head->boardInst.board[x][y].type))
 
-        //fprintf(stderr, "\n");
-            //fprintf(stderr, "\n");
+        fprintf(stderr, "\n");
+            fprintf(stderr, "\n");
 
         for(int i = 0; i < head->childCount; i++){
             
-            //DISPLAYBOARD(fprintf(stderr, "%d", head->children[i]->boardInst.board[x][y].type))
+            DISPLAYBOARD(head->children[i]->boardInst.x_lim, head->children[i]->boardInst.y_lim,fprintf(stderr, "%d", head->children[i]->boardInst.board[x][y].type))
 
-            //fprintf(stderr, "\n");
-            //fprintf(stderr, "\n");
+            fprintf(stderr, "This node has dims of %dx%d and: %d children\n", head->children[i]->boardInst.x_lim, head->children[i]->boardInst.y_lim,head->children[i]->childCount);
+            fprintf(stderr, "\n");
 
             //head->children[i]->delve(1);
 

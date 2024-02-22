@@ -9,8 +9,8 @@
 #include <math.h>
 #include <iostream>
 
-#define DISPLAYBOARD(code)for(int x = 0; x<40; x++){\
-                for(int y = 0; y<40; y++){\
+#define DISPLAYBOARD(x_dist, y_dist, code)for(int x = 0; x<x_dist; x++){\
+                for(int y = 0; y<y_dist; y++){\
                     code;\
                 }\
                 fprintf(stderr, "\n");\
@@ -58,7 +58,7 @@
 #define NULLACTION -1
 
 #define GRANULARITY 1000.0
-
+#define ATROPHYRATIO 1.0
 
 
 //normal width = 1280
@@ -78,6 +78,7 @@
 #define SCALAR 1.0f/INITDIM
 #define LINEWIDTH 0.001f
 
+#define DEPTH 2
 
 
 #ifndef INCLUDES

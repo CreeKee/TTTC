@@ -2,12 +2,15 @@
 #include "MoveList.hpp"
 #include "tlist.hpp"
 
-gtNode::gtNode(boardInstance incBoard){
+gtNode::gtNode(boardInstance incBoard, gtNode* prev){
     maxKids = INITKIDS;
     children = (gtNode**)calloc(INITKIDS, sizeof(gtNode*));
     childCount = 0;
     isleaf = true;
+    atrophy = false;
     boardInst = incBoard;
+
+    parent = prev;
 }
 
 void gtNode::expandPlaceThreeEmpty(){
@@ -153,7 +156,7 @@ void gtNode::storeBoard(boardInstance boardInst){
         children = (gtNode**)realloc(children, sizeof(gtNode*)*maxKids);
     }
 
-    children[childCount++] = new gtNode(boardInst);
+    children[childCount++] = new gtNode(boardInst, this);
 
     //fprintf(stderr, "finished storing board %d\n", boardCount++);
 }
