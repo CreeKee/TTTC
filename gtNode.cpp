@@ -44,7 +44,7 @@ void gtNode::expandBlockTwo(){
     }
 }
 
-void gtNode::expandClaimOne(){
+void gtNode::expandClaimOne(uint32_t playerID){
     //get all possible moves
     tlist tileList = boardInst.getAllMoves(CLAIMEDTILE);
     MoveList newDiff;
@@ -56,7 +56,7 @@ void gtNode::expandClaimOne(){
     //compute all possible board permutations
 
     while(!tileList.isEmpty()){
-        computeAction(CLAIMEDTILE, tileList.pop(), tileList.copy(), 0, newboard);
+        computeAction(CLAIMEDTILE, tileList.pop(), tileList.copy(), playerID, newboard);
     }
 }
 

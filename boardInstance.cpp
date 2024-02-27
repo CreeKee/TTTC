@@ -1,4 +1,6 @@
 #include "boardInstance.hpp"
+#define INFIELD(a,b)  board[a][b].type == CLAIMEDTILE && board[a][b].owner == curPlayer
+
 
 boardInstance::boardInstance(){
 
@@ -206,8 +208,134 @@ bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
 void boardInstance::displayBoard(){
     for(int x = 0; x<x_lim; x++){
         for(int y = 0; y<y_lim; y++){
-            fprintf(stderr, "%d",board[x][y].type);
+
+            if(board[x][y].type == CLAIMEDTILE) fprintf(stderr, "%d",board[x][y].owner+7);
+            else fprintf(stderr, "%d",board[x][y].type);
+            
         }
         fprintf(stderr, "\n");
     }
 }
+
+bool boardInstance::checkWinCon(coord crds, uint32_t curPlayer){
+
+    crds.x += x_lim>>1;
+    crds.y += y_lim>>1;
+
+    int lined = 0;
+    bool ret = false;
+
+    if(INFIELD(crds.x-1,crds.y)){
+        lined++;
+        if(INFIELD(crds.x-2,crds.y)) lined++;
+    }
+    if(INFIELD(crds.x+1,crds.y)){
+        lined++;
+        if(INFIELD(crds.x+2,crds.y)) lined++;
+    }
+    ret = (lined >= 2);
+    lined = 0;  
+
+    if(!ret){
+        if( INFIELD(crds.x,crds.y-1)){
+            lined++;
+            if(INFIELD(crds.x,crds.y-2)) lined++;
+        }
+        if(INFIELD(crds.x,crds.y+1)){
+            lined++;
+            if(INFIELD(crds.x,crds.y+2)) lined++;
+        }
+        ret = (lined >= 2);
+        lined = 0;  
+    }
+
+    if(!ret){
+        if( INFIELD(crds.x-1,crds.y-1)){
+            lined++;
+            if(INFIELD(crds.x-2,crds.y-2)) lined++;
+        }
+        if(INFIELD(crds.x+1,crds.y+1)){
+            lined++;
+            if(INFIELD(crds.x+2,crds.y+2)) lined++;
+        }
+        ret = (lined >= 2);
+        lined = 0;  
+    }
+
+    if(!ret){
+        if( INFIELD(crds.x+1,crds.y-1)){
+            lined++;
+            if(INFIELD(crds.x+2,crds.y-2)) lined++;
+        }
+        if(INFIELD(crds.x-1,crds.y+1)){
+            lined++;
+            if(INFIELD(crds.x-2,crds.y+2)) lined++;
+        }
+        ret = (lined >= 2);
+        lined = 0;  
+    }
+
+    return ret;
+}
+
+uint32_t boardInstance::checkClaim(coord crds, uint32_t curPlayer, bool* wincon){
+
+    uint32_t total = 1;
+    uint lined = 0;
+    bool ret = false;
+
+    if(INFIELD(crds.x-1,crds.y)){
+        lined++;
+        if(INFIELD(crds.x-2,crds.y)) lined++;
+    }
+    if(INFIELD(crds.x+1,crds.y)){
+        lined++;
+        if(INFIELD(crds.x+2,crds.y)) lined++;
+    }
+    *wincon = (lined >= 2);
+    total += lined;
+    lined = 0;  
+
+    if(!ret){
+        if( INFIELD(crds.x,crds.y-1)){
+            lined++;
+            if(INFIELD(crds.x,crds.y-2)) lined++;
+        }
+        if(INFIELD(crds.x,crds.y+1)){
+            lined++;
+            if(INFIELD(crds.x,crds.y+2)) lined++;
+        }
+        *wincon = (lined >= 2);
+        total += lined;
+        lined = 0;  
+    }
+    if(!ret){
+        if( INFIELD(crds.x-1,crds.y-1)){
+            lined++;
+            if(INFIELD(crds.x-2,crds.y-2)) lined++;
+        }
+        if(INFIELD(crds.x+1,crds.y+1)){
+            lined++;
+            if(INFIELD(crds.x+2,crds.y+2)) lined++;
+        }
+        *wincon = (lined >= 2);
+        total += lined;
+        lined = 0;  
+    }
+    if(!ret){
+        if( INFIELD(crds.x+1,crds.y-1)){
+            lined++;
+            if(INFIELD(crds.x+2,crds.y-2)) lined++;
+        }
+        if(INFIELD(crds.x-1,crds.y+1)){
+            lined++;
+            if(INFIELD(crds.x-2,crds.y+2)) lined++;
+        }
+        *wincon = (lined >= 2);
+        total += lined;
+        lined = 0;  
+    }
+
+    return total;
+}
+

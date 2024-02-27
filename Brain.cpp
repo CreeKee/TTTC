@@ -26,17 +26,20 @@ void Brain::readWeights(char* filename){
 
     //TODO temporary biasing
     float* weight = (float*)(&weights);
+    for(int curW = 20; curW < 2; curW++){
+        weight[curW] = 0;
+    }
     for(int curW = 2; curW < 6; curW++){
-        weight[curW] += 100;
+        weight[curW] = 100;
     }
     for(int curW = 6; curW < 10; curW++){
-        weight[curW] -= 10;
+        weight[curW] = -10;
     }
     for(int curW = 10; curW < 14; curW++){
-        weight[curW] += 100;
+        weight[curW] = 100;
     }
     for(int curW = 14; curW < 18; curW++){
-        weight[curW] -= 10;
+        weight[curW] = 10;
     }
 }
 
@@ -74,6 +77,58 @@ int32_t Brain::evaluate(boardInstance boardInst, int32_t* hardwin){
     }
 
     return val;
+}
+
+int32_t Brain::evaluateLight(boardInstance boardInst, int32_t* hardwin){
+    
+    int32_t val = 0;
+    precepts vals = gatherPreceptsLight(boardInst);
+
+    float* curWeight = (float*)(&weights);
+    uint32_t* curPrecept = (uint32_t*)(&vals);
+
+    for(int mv = 0; mv < PRECEPTCOUNT; mv++){ 
+        val += (curWeight[mv])*(curPrecept[mv]);
+    }
+    if(vals.win > 0){
+        *hardwin = 1;
+    }
+    if(vals.lose > 0){
+        *hardwin = -1;
+    }
+
+    return val;
+}
+
+precepts Brain::gatherPreceptsLight(boardInstance boardInst){
+
+    bool checkEnd = false;
+    coord crds;
+    precepts vals = {0};
+
+
+    for(crds.x = 0; crds.x < boardInst.x_lim && !checkEnd; crds.x++){
+        for(crds. y = 0; crds.y < boardInst.y_lim && !checkEnd; crds.y++){
+            if(boardInst.board[crds.x][crds.y].type == CLAIMEDTILE){
+
+                
+                if(boardInst.board[crds.x][crds.y].owner == playerID){
+                    vals.selfclaimadjadj += boardInst.checkClaim(crds, playerID, &checkEnd);
+                }
+                else{
+                    vals.otherclaimadjadj += boardInst.checkClaim(crds, !playerID, &checkEnd);
+                    
+                }
+            }
+        }
+    }
+
+    if(checkEnd){
+        if(boardInst.board[crds.x][crds.y].owner == playerID) vals.win++;
+        else vals.lose++;
+    } 
+
+    return vals;
 }
 
 precepts Brain::gatherPrecepts(boardInstance boardInst){

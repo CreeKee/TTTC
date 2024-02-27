@@ -57,6 +57,9 @@ class boardInstance{
     bool makeMove(uint32_t actType, coord crds, uint32_t curPlayer);
     
     void displayBoard();
+    bool checkWinCon(coord crds, uint32_t curPlayer);
+    uint32_t checkClaim(coord crds, uint32_t curPlayer, bool* wincon);
+
 };
 
 #endif

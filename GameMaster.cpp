@@ -53,63 +53,7 @@ bool GameMaster::placeEmptyTile(coord crds){
     return ret;
 }
 
-bool GameMaster::checkWinCon(coord crds){
 
-    int lined = 0;
-    bool ret = false;
-
-    if(INFIELD(crds.x-1,crds.y)){
-        lined++;
-        if(INFIELD(crds.x-2,crds.y)) lined++;
-    }
-    if(INFIELD(crds.x+1,crds.y)){
-        lined++;
-        if(INFIELD(crds.x+2,crds.y)) lined++;
-    }
-    ret = (lined >= 2);
-    lined = 0;  
-
-    if(!ret){
-        if( INFIELD(crds.x,crds.y-1)){
-            lined++;
-            if(INFIELD(crds.x,crds.y-2)) lined++;
-        }
-        if(INFIELD(crds.x,crds.y+1)){
-            lined++;
-            if(INFIELD(crds.x,crds.y+2)) lined++;
-        }
-        ret = (lined >= 2);
-        lined = 0;  
-    }
-
-    if(!ret){
-        if( INFIELD(crds.x-1,crds.y-1)){
-            lined++;
-            if(INFIELD(crds.x-2,crds.y-2)) lined++;
-        }
-        if(INFIELD(crds.x+1,crds.y+1)){
-            lined++;
-            if(INFIELD(crds.x+2,crds.y+2)) lined++;
-        }
-        ret = (lined >= 2);
-        lined = 0;  
-    }
-
-    if(!ret){
-        if( INFIELD(crds.x+1,crds.y-1)){
-            lined++;
-            if(INFIELD(crds.x+2,crds.y-2)) lined++;
-        }
-        if(INFIELD(crds.x-1,crds.y+1)){
-            lined++;
-            if(INFIELD(crds.x-2,crds.y+2)) lined++;
-        }
-        ret = (lined >= 2);
-        lined = 0;  
-    }
-
-    return ret;
-}
 
 bool GameMaster::gameAction(int action, coord crds, int* winner){
 
@@ -119,8 +63,10 @@ bool GameMaster::gameAction(int action, coord crds, int* winner){
 
     switch(action){
         case CLAIM:
+            fprintf(stderr, "handling claim action\n");
             if(ret = claimTile(crds)){
-                if(checkWinCon(crds)){
+                
+                if(boardInst.checkWinCon(crds, curPlayer)){
                     *winner = curPlayer; 
                 }
             }
@@ -167,10 +113,8 @@ int GameMaster::takeTurn(){
                 
                 if(pos.x >= 0 && pos.y >= 0){
                     if(gameAction(PLACE, pos, &winner)){
-                        printf("wee %d %d %d\n", select, steps, phase);
                         steps--;
                         phase = ACTIVE;
-                        printf("wee2 %d %d %d\n", select, steps, phase);
                     } 
                     if(steps == 0) phase = END;
                 }
@@ -302,6 +246,8 @@ int GameMaster::takeTurn(MoveList moves){
         }
     }
     curPlayer = (curPlayer+1)%playerCount;
+    prevmoves = curmoves;
+    curmoves = MoveList();
 
     return winner;
 }

@@ -35,7 +35,6 @@ BotG0::BotG0(uint32_t playerID, char* filename){
     for(int d = 0; d < DEPTH; d++){
         gameTree.computeLayer(doMax);
     }
-
     //gameTree.traverse();
 
 }

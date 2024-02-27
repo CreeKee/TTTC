@@ -10,7 +10,6 @@
 
 #define UPDATEDIMS x = x+zset*RATIO; y = y+zset
 #define CHECKEXIST (boardInst.board != nullptr) && (field[x] != nullptr) && (x < fieldSize) && (x >= 0) && (y < fieldSize) && (y >= 0) 
-#define INFIELD(a,b)  boardInst.board[a+(boardInst.x_lim>>1)][b+(boardInst.y_lim>>1)].owner == curPlayer
 #define UPDATELIMS if(x > lim.xmax) lim.xmax = x; else if(x < lim.xmin) lim.xmin = x;\
                    if(y > lim.ymax) lim.ymax = y; else if(y < lim.ymin) lim.ymin = y;
 

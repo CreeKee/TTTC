@@ -34,39 +34,44 @@ int main(int argc, char** argv){
     MoveList moves;
     uint32_t movenum = 0;
 
-    BotG0* players[2] = {new BotG0(0, "weights1.txt"), new BotG0(1, "weights1.txt")};
+    BotG0* players[2] = {new BotG0(1, "weights1.txt"), new BotG0(1, "weights1.txt")};
     bool curplayer = 1;
 
+    //players[0]->dive();
+
+    
     GameMaster gamemast(2);
     gamemast.startGame();
 
     players[0]->displayWeights();
 
     fprintf(stderr, "game has been started\n");
+    
+    gamemast.displayBoard();
 
     moves = players[0]->getNextAction();
     displayMove(moves);
     
     fprintf(stderr, "\n\nsubmitting first move\n");
     
-    
-    if((winner = gamemast.takeTurn(moves)) == -1){
+        //submit move
+    while((winner = gamemast.takeTurn(moves)) == -1){
+
+        //display board and announce move number
         gamemast.displayBoard();
-        fprintf(stderr, "move number: %d\n\n",movenum++);
+        fprintf(stderr, "move number: %d\n\n",++movenum);
         
-        
+
+        //get next move
         fprintf(stderr, "getting next action\n");
         moves = players[curplayer]->getNextAction(moves);
         
-        gamemast.takeTurn(moves);
-        displayMove(moves);
-        gamemast.displayBoard();
-        
-
-        fprintf(stderr, "move number: %d\n\n",movenum++);
+        //alternate player
         curplayer = !curplayer;
     }
 
+
+    gamemast.displayBoard();
     fprintf(stderr, "winner is %d\n",winner);
 
     /*

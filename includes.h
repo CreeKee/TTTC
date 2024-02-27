@@ -1,9 +1,7 @@
 
 
 #define GLFW_INCLUDE_GLCOREARB
-#include <GLFW/glfw3.h>
 
-#include "glad/include/glad/glad.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

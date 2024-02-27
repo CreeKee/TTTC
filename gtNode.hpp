@@ -17,7 +17,7 @@ class gtNode{
     uint32_t goldenIndex;
     bool wasmax;
     
-    gtNode(){children = nullptr; parent = nullptr; value = 0;}
+    gtNode(){children = nullptr; parent = nullptr; value = 0; atrophy = false; isleaf = true;}
     gtNode(boardInstance incBoard, gtNode* prev);
     ~gtNode(){
         //fprintf(stderr, "gtNode destructor\n");
@@ -44,6 +44,7 @@ class gtNode{
         }
     }
     void backprop(bool doMax, bool force){
+        
         if(parent != nullptr){
             parent->value = value;
             parent->backprop(!doMax);
@@ -59,7 +60,7 @@ class gtNode{
 
     void expandPlaceThreeEmpty();
     void expandBlockTwo();
-    void expandClaimOne();
+    void expandClaimOne(uint32_t playerID);
     void expandPlaceAndBlock();
 
     void computeAction(uint32_t actType, coord crds, tlist remList, uint32_t reps, boardInstance binst);

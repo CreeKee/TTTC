@@ -63,6 +63,16 @@ class gtObserver{
         }
 
     }
+    void dive(){
+        int depth = 0;
+        gtNode* cur = head;
+        while(!cur->isleaf){
+            fprintf(stderr, "playerID: %d depth: %d, wasmax %d, is leaf: %d, was atrophy: %d, golden child at %d\n", brian.playerID, depth++, cur->wasmax, cur->isleaf, cur->atrophy, cur->goldenIndex);
+            cur = cur->children[cur->goldenIndex];
+        }
+        fprintf(stderr, "playerID: %d depth: %d, wasmax %d, is leaf: %d, was atrophy: %d, golden child at %d\n", brian.playerID, depth++, cur->wasmax, cur->isleaf, cur->atrophy, cur->goldenIndex);
+        fprintf(stderr, "\n");
+    }
 
     void monteCarloStore(uint32_t choice);
 };

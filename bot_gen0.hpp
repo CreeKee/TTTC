@@ -24,7 +24,7 @@ class BotG0{
     void readWeights(char* filename){gameTree.brian.readWeights(filename);}
     void displayWeights(){gameTree.brian.displayWeights();fprintf(stderr,"\n");}
     
-
+    void dive(){gameTree.dive();}
 };
 
 
