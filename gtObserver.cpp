@@ -6,26 +6,6 @@ gtObserver::gtObserver(){
 
     head = new gtNode;
     
-    head->boardInst.x_lim = BOARDINSTINIT;
-    head->boardInst.y_lim = BOARDINSTINIT;
-    head->boardInst.board = (tile**)calloc(head->boardInst.x_lim, sizeof(tile*));
-
-    head->boardInst.x_scale = 0;
-    head->boardInst.y_scale = 0;
-
-
-    for(int col = 0; col < head->boardInst.x_lim; col++){
-        head->boardInst.board[col] = (tile*)calloc(head->boardInst.y_lim, sizeof(tile));
-    }
-
-    head->boardInst.board[BOARDINSTINIT>>1][BOARDINSTINIT>>1].type = BLOCKEDTILE;
-
-    head->childCount = 0;
-    head->maxKids = INITKIDS;
-    head->children = (gtNode**)calloc(INITKIDS, sizeof(gtNode*));
-    head->isleaf = true;
-    head->atrophy = false;
-    
     if(DBG) fprintf(stderr,"END observer constructor %p\n",head);
 
 }
@@ -71,16 +51,18 @@ MoveList gtObserver::getBestAction(){
     
     gtNode* newhead;
     bool doMax = true;
-    fprintf(stderr, "getting best child at index %d out of %d kids. was max? %d\n", head->goldenIndex, head->childCount, head->wasmax);
+    
+    //if we are at the bottom of the game tree, expand it to ensure we have moves to make
     if(head->isleaf) for(int depth = 0; depth < DEPTH; depth++){
         computeLayer(doMax);
         doMax = !doMax;
     }
+
+    //select golden child
     return head->children[head->goldenIndex]->boardInst.diff;
 }
 
 uint32_t gtObserver::computeLayer(bool doMax){
-    //fprintf(stderr, "head at %p\n", head);
     return computeLayer(head, doMax, 0);
 }
 
@@ -95,13 +77,19 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
 
     uint32_t choice = 2;
     
-    //fprintf(stderr,"beginning computation at depth %d, count =  %d\n", depth, compute_count++);
+    //record if it was max's or min's turn
     curNode->wasmax = doMax;
+
+    //limit recursion depth
+    /*
     if(depth >= DEPTH){
         return 0;
-    }
+    }*/
+
 
     if(curNode->isleaf){
+
+        //clear flags
         curNode->isleaf = false;
         curNode->atrophy = false;
 
@@ -111,10 +99,8 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
         curNode->expandClaimOne(brian.playerID);
         curNode->expandPlaceAndBlock();
 
-        //fprintf(stderr, "finished placing 3\n");
-
+        //evaluate all newely generated children
         for(uint32_t child = 0; child < curNode->childCount && !(hardwin); child++){
-            //evaluate all newely generated children
             val = brian.evaluateLight(curNode->children[child]->boardInst, &hardwin);
             curNode->children[child]->value = val;  
             curNode->children[child]->wasmax = !doMax;
@@ -127,72 +113,62 @@ uint32_t gtObserver::computeLayer(gtNode* curNode, bool doMax, uint32_t depth){
         }
     }
     else{
+
+        //expand all child nodes
         for(uint32_t child = 0; child < curNode->childCount; child++){
+
+            //skip atrophied nodes
             if(!curNode->children[child]->atrophy) computeLayer((curNode->children[child]), !doMax, depth+1);
         }
     }
 
     for(uint32_t child = 0; child < curNode->childCount; child++){
+
         //get value from current node
         val = curNode->children[child]->value;
 
+        //check if its max's turn
         if(doMax){
+
+            //check if current child is of high value
             if((val > bestVal) || (hardwin == 1)){
                 bestVal = val;
                 choice = child;
             }
+
+            //atrophy current child if its value is too low
             else if(val <= ATROPHYRATIO * bestVal ){
                 curNode->children[child]->atrophy = true;
             }
             
         }
+
+        //if it is min's turn
         else{
+
+            //check if current child is of low value
             if((val < bestVal) || (hardwin == -1)){
-                //fprintf(stderr, "changing choice to: %d\n", choice);
                 bestVal = val;
                 choice = child;
             }
+
+            //atrophy current child if its value is too high
             else if(val >= ATROPHYRATIO * bestVal+1 ){
                 curNode->children[child]->atrophy = true;
             }
         }
-
     }
-    //fprintf(stderr, "\n");
 
     //store index of best child
     curNode->goldenChild(choice);
     
 
-    //if(choice == 2) fprintf(stderr, "choice is 2, bestVal is %d doMax is %d from player %d\n",bestVal, doMax, brian.playerID);
-
-
     return bestVal;
 }
 
-int32_t gtObserver::evaluate(boardInstance boardInst) {
+void gtObserver::reset(){
 
-    for(int y = 0; y < boardInst.y_lim-1; y++){
-        for(int x = 0; x < boardInst.x_lim-1; x++){
-            if(boardInst.board[x][y].type == CLAIMEDTILE){
+    delete head;
+    head = new gtNode;
 
-            }
-        }
-    }
-    
-    return 1;
-}
-
-void gtObserver::monteCarloStore(uint32_t choice){
-    
-    uint32_t* num = new uint32_t;
-    
-    file.read((char*)num, 4);
-
-    if(*num == -1){
-        //something has gone wrong
-    }
-    if(choice != *num){
-
-    }
 }

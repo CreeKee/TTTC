@@ -17,7 +17,13 @@ class gtNode{
     uint32_t goldenIndex;
     bool wasmax;
     
-    gtNode(){children = nullptr; parent = nullptr; value = 0; atrophy = false; isleaf = true;}
+    gtNode(){
+        childCount = 0;
+        maxKids = INITKIDS;
+        children = (gtNode**)calloc(INITKIDS, sizeof(gtNode*));
+        isleaf = true;
+        atrophy = false;
+    }
     gtNode(boardInstance incBoard, gtNode* prev);
     ~gtNode(){
         //fprintf(stderr, "gtNode destructor\n");

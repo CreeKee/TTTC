@@ -20,9 +20,13 @@ void Brain::storeWeights(char* filename){
 
 void Brain::readWeights(char* filename){
     std::ifstream file;
+
+    fprintf(stderr, "opening file: %s... ",filename);
     file.open(filename);
     file.read((char*)(&weights), sizeof(float)*PRECEPTCOUNT);
     file.close();
+
+    fprintf(stderr, "file has been closed\n");
 
     //TODO temporary biasing
     float* weight = (float*)(&weights);

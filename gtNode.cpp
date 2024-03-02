@@ -14,16 +14,16 @@ gtNode::gtNode(boardInstance incBoard, gtNode* prev){
 }
 
 void gtNode::expandPlaceThreeEmpty(){
+
     tlist tileList = boardInst.getAllMoves(EMPTYTILE);
     MoveList newDiff;
     newDiff.actionSelect = PLACETHREE;
 
     boardInstance newboard = boardInstance(boardInst.board, boardInst.x_lim, boardInst.y_lim, 0, 0, newDiff, 0);
 
+    //place all desired empty tiles
     while(!tileList.isEmpty()){
-        //fprintf(stderr, "list size %d\n", tileList.count);
         computeAction(EMPTYTILE, tileList.pop(), tileList.copy(), 2, newboard);
-        if(DBG) fprintf(stderr, "list size after compute %d but empty == %d\n", tileList.count, tileList.isEmpty());
     }
 }
 
@@ -38,13 +38,13 @@ void gtNode::expandBlockTwo(){
     boardInstance newboard = boardInstance(boardInst.board, boardInst.x_lim, boardInst.y_lim, 0, 0, newDiff, 0);
 
     //compute all possible board permutations
-
     while(tileList.count > 1){
         computeAction(BLOCKEDTILE, tileList.pop(), tileList.copy(), 1, newboard);
     }
 }
 
 void gtNode::expandClaimOne(uint32_t playerID){
+
     //get all possible moves
     tlist tileList = boardInst.getAllMoves(CLAIMEDTILE);
     MoveList newDiff;
@@ -54,14 +54,14 @@ void gtNode::expandClaimOne(uint32_t playerID){
     boardInstance newboard = boardInstance(boardInst.board, boardInst.x_lim, boardInst.y_lim, 0, 0, newDiff, 0);
 
     //compute all possible board permutations
-
     while(!tileList.isEmpty()){
         computeAction(CLAIMEDTILE, tileList.pop(), tileList.copy(), playerID, newboard);
     }
 }
 
 void gtNode::expandPlaceAndBlock(){
-        //get all possible moves
+
+    //get all possible moves
     tlist tileList = boardInst.getAllMoves(EMPTYTILE);
     MoveList newDiff;
     newDiff.actionSelect = PLACEBLOCK;
@@ -70,11 +70,9 @@ void gtNode::expandPlaceAndBlock(){
     boardInstance newboard = boardInstance(boardInst.board, boardInst.x_lim, boardInst.y_lim, 0, 0, newDiff, 0);
 
     //compute all possible board permutations
-
     while(!tileList.isEmpty()){
         computeAction(EBLOCK, tileList.pop(), tileList.copy(), 1, newboard);
     }
-
 
 }
 
@@ -88,9 +86,12 @@ void gtNode::computeAction(uint32_t actType, coord crds, tlist remList, uint32_t
     //update tile type based on action
     newboard.board[shiftx][shifty].type = curAct;
 
+    //add move to differentiation of the new board instance
     newboard.diff.addMove(curAct, crds.x, crds.y);
 
     if(curAct == EMPTYTILE){
+
+        //check if board needs to be expanded
         if(shiftx >= newboard.x_lim-4 || shiftx <= 4){
             newboard.x_scale += 2;
         }
@@ -98,8 +99,6 @@ void gtNode::computeAction(uint32_t actType, coord crds, tlist remList, uint32_t
             newboard.y_scale += 2;
         }
         
-        //fprintf(stderr, "pickles %d %d %d %d %d %d\n",crds.x, crds.y, shiftx, shifty, newboard.x_lim, newboard.y_lim);
-
         //update adjacencies an availabilities
         if(newboard.board[shiftx+1][shifty].type == NULLTILE){
             newboard.board[shiftx+1][shifty].type = ADJTILE;
@@ -117,18 +116,22 @@ void gtNode::computeAction(uint32_t actType, coord crds, tlist remList, uint32_t
             newboard.board[shiftx][shifty-1].type = ADJTILE;
             remList.insert(crds.x, crds.y-1);
         }
-        //fprintf(stderr, "flag\n");
     }
     else if(curAct == CLAIMEDTILE){
+
+        //claim tile
         newboard.board[shiftx][shifty].owner = reps;
     }
+
     //check whether further action is needed
     if(reps > 0 && curAct != CLAIMEDTILE){
         
         if(actType == EBLOCK){
             
+            //find all possible blocking tiles
             remList = newboard.getAllMoves(BLOCKEDTILE);
 
+            //compute all possible blocking options
             while(!remList.isEmpty()){
                 computeAction(BLOCKEDTILE, remList.pop(), remList.copy(), 0, newboard);
             }
@@ -151,12 +154,14 @@ void gtNode::storeBoard(boardInstance boardInst){
 
     static int boardCount = 0;
 
+    //check for resizing
     if(childCount >= maxKids){
+
+        //expand child table
         maxKids = maxKids<<1;
         children = (gtNode**)realloc(children, sizeof(gtNode*)*maxKids);
     }
 
+    //add child to child table
     children[childCount++] = new gtNode(boardInst, this);
-
-    //fprintf(stderr, "finished storing board %d\n", boardCount++);
 }

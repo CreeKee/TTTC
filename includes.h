@@ -78,6 +78,7 @@
 
 #define DEPTH 2
 
+#define MOVELIMIT 15
 
 #ifndef INCLUDES
 #define INCLUDES

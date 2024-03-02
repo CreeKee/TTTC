@@ -54,9 +54,11 @@ tlist boardInstance::getAllMoves(int32_t actType){
 
     switch(actType){
         case EMPTYTILE:
-            if(DBG) fprintf(stderr,"getting all empty tiles %d %d\n", x_lim, y_lim);
+
+            //iterate over the entire board
             LISTERATION(
                 
+                //set any adjaceny tile types for adjecent tiles
                 if(board[x][y].type != NULLTILE && board[x][y].type != ADJTILE){
 
                     if(x+1 < x_lim && board[x+1][y].type == NULLTILE){
@@ -79,6 +81,8 @@ tlist boardInstance::getAllMoves(int32_t actType){
             )
 
             LISTERATION(
+
+                //record all adjacent tiles
                 if(board[x][y].type == ADJTILE){
                     newlist.insert(x-(x_lim>>1),y-(y_lim>>1));
                 }
@@ -90,6 +94,7 @@ tlist boardInstance::getAllMoves(int32_t actType){
         case BLOCKEDTILE:
             LISTERATION(
 
+                //record all empty tiles
                 if(board[x][y].type == EMPTYTILE){
                     newlist.insert(x-(x_lim>>1),y-(y_lim>>1));
                 }
@@ -98,6 +103,7 @@ tlist boardInstance::getAllMoves(int32_t actType){
             break;
     }
 
+    //return list of recorded tiles
     return newlist;
 }
 
@@ -107,14 +113,18 @@ will automaticall shift dimensions
 bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
 
     //boardInstance newboard = boardInstance(binst.board, binst.x_lim, binst.y_lim, binst.x_scale, binst.y_scale, binst.diff, binst.diffDex);
+    
+    //adjust coordinets from logical board to actual board
     int shiftx = crds.x + (x_lim>>1);
     int shifty = crds.y + (y_lim>>1);
+
     uint32_t curAct = (actType == EBLOCK ? EMPTYTILE : actType);
     tile** oldboard = board;
     bool validMove = false;
 
     fprintf(stderr, "***%d %d*** >", crds.x, crds.y);
 
+    //check if board needs to be expanded
     if(shiftx >= x_lim-4 || shiftx <= 4){
         x_scale += 2;
     }
@@ -122,39 +132,49 @@ bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
         y_scale += 2;
     }
 
+    //expand board if needed
     if(x_scale != 0 || y_scale != 0){
 
+        //update dimensions
         x_lim = x_lim+(x_scale<<1);
         y_lim = y_lim+(y_scale<<1);
 
+        //create new board
         board = new tile*[x_lim];
 
         for(int col = 0; col < x_lim; col++){
-            board[col] = new tile[y_lim]();//(tile*)calloc(y_lim, sizeof(tile));
+            board[col] = new tile[y_lim]();
         }
 
+        //copy old board to new board
         for(int col = x_scale; col < x_lim-x_scale; col++){
             for(int row = y_scale; row < y_lim-y_scale; row++){
                 board[col][row] = oldboard[col-x_scale][row-y_scale];
             }
+
+            //delete old board
             delete oldboard[col-x_scale];
         }
 
+        //reset scaling
         x_scale = 0;
         y_scale = 0;
 
+        //finish deleteing old board
         delete oldboard;
     }
 
 
+    //re-adjust coordinets in case of board expansion
     shiftx = crds.x + (x_lim>>1);
     shifty = crds.y + (y_lim>>1);
-
 
     fprintf(stderr, "> ***%d %d***\n", shiftx, shifty);
 
     switch(curAct){
         case EMPTYTILE:
+
+            //verify move legality
             if(board[shiftx][shifty].type == ADJTILE){
 
                 //update tile type based on action
@@ -179,18 +199,23 @@ bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
         break;
 
         case CLAIMEDTILE:
+
+            //verify move legality
             if(board[shiftx][shifty].type == EMPTYTILE){
+
                 //update tile type based on action
                 board[shiftx][shifty].type = curAct;
                 board[shiftx][shifty].owner = curPlayer;
 
                 validMove = true;
             }
-            
         break;
 
         case BLOCKEDTILE:
+
+            //verify move legality
             if(board[shiftx][shifty].type == EMPTYTILE){
+                
                 //update tile type based on action
                 board[shiftx][shifty].type = curAct;
                 validMove = true;

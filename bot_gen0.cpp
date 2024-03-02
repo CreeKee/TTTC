@@ -64,3 +64,10 @@ MoveList BotG0::getNextAction(){
     return moves;
 }
 
+void BotG0::reset(){
+    doMax = (gameTree.brian.playerID == 0);
+    gameTree.reset();
+    for(int d = 0; d < DEPTH; d++){
+        gameTree.computeLayer(doMax);
+    }
+}

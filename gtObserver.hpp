@@ -34,8 +34,6 @@ class gtObserver{
     uint32_t computeLayer(bool doMax);
     uint32_t computeLayer(gtNode* curNode, bool doMax, uint32_t depth);
 
-
-    int32_t evaluate(boardInstance boardInst);
     uint64_t hashPosition();
     uint64_t hashMove(move mv);
     void expandKids();
@@ -74,7 +72,7 @@ class gtObserver{
         fprintf(stderr, "\n");
     }
 
-    void monteCarloStore(uint32_t choice);
+    void reset();
 };
 
 

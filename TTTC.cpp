@@ -1,6 +1,5 @@
 /* Ask for an OpenGL Core Context */
 
-
 #include "includes.h"
 #include "WindowManager.hpp"
 #include "FieldManager.hpp"
@@ -9,7 +8,21 @@
 
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
+#define POPULATION 100
 
+
+
+struct AgentData{
+    BotG0* agent0;
+    BotG0* agent1;
+
+    uint32_t wins = 0;
+    uint32_t gamesPlayed = 0;
+    uint32_t movesTaken = 0;
+};
+
+AgentData runGeneration();
+void runGame(AgentData** players);
 
 void displayMove(MoveList moves){
 
@@ -26,7 +39,7 @@ void displayMove(MoveList moves){
 }
 
 int main(int argc, char** argv){
-    position p;
+    /*position p;
     int a = 0;
     int b = 0;
     int winner = -1;
@@ -39,7 +52,6 @@ int main(int argc, char** argv){
 
     //players[0]->dive();
 
-    
     GameMaster gamemast(2);
     gamemast.startGame();
 
@@ -54,7 +66,7 @@ int main(int argc, char** argv){
     
     fprintf(stderr, "\n\nsubmitting first move\n");
     
-        //submit move
+    //submit move
     while((winner = gamemast.takeTurn(moves)) == -1){
 
         //display board and announce move number
@@ -73,7 +85,7 @@ int main(int argc, char** argv){
 
     gamemast.displayBoard();
     fprintf(stderr, "winner is %d\n",winner);
-
+*/
     /*
     WindowManager winman;
     FieldManager fieldman((((float)WIDTH)/HEIGHT));
@@ -132,7 +144,117 @@ int main(int argc, char** argv){
     bot.updateWeights();
     bot.saveWeights("weights1.txt");
     */
+    
+    runGeneration();
+    
     fprintf(stderr, "ending main\n");
     return 0;
 }
 
+AgentData runGeneration(){
+    uint8_t digitA = '0';
+    uint8_t digitB = '0';
+    uint8_t digitC = '0';
+    uint32_t best = 0;
+
+    char filename[] = "weights/weight000.txt";
+    AgentData agents[POPULATION];
+    AgentData* players[2];
+    
+    for(int agent = 0; agent < POPULATION; agent++){
+        
+        agents[agent].agent0 = new BotG0(0,filename);
+        agents[agent].agent1 = new BotG0(1,filename);
+
+        digitA = (agent+1)%10+'0';
+        digitB = ((agent+1)/10)%10+'0';
+        digitC = ((agent+1)/100)%10+'0';
+
+        //filename[14] = digitC;
+        //filename[15] = digitB;
+        //filename[16] = digitA;
+
+    }
+
+    for(int agentA = 0; agentA<POPULATION; agentA++){
+        for(int agentB = agentA+1; agentB<POPULATION; agentB++){
+            players[0] = &agents[agentA];
+            players[1] = &agents[agentB];
+            //runGame(players);
+
+            players[0] = &agents[agentB];
+            players[1] = &agents[agentA];
+            //runGame(players);
+        }
+    }
+    
+    for(int cur = 1; cur<POPULATION; cur++){
+        if(agents[cur].wins > agents[best].wins){
+            best = cur;
+        }
+        else if(agents[cur].wins == agents[best].wins && agents[cur].movesTaken < agents[best].movesTaken){
+            best = cur;
+        }
+    }
+
+    return agents[best];
+}
+
+void runGame(AgentData** players){
+
+    bool curplayer = 1;
+    int winner = -1;
+    MoveList moves;
+    GameMaster gamemast(2);
+    uint32_t movenum = 0;
+
+    gamemast.startGame();
+
+    //fprintf(stderr, "game has been started\n");
+    
+    gamemast.displayBoard();
+
+    moves = players[0]->agent0->getNextAction();
+    players[0]->movesTaken++;
+    //displayMove(moves);
+    
+    //fprintf(stderr, "\n\nsubmitting first move\n");
+    
+    //submit move
+    while(((winner = gamemast.takeTurn(moves)) == -1) && movenum<MOVELIMIT){
+
+        //display board and announce move number
+        //gamemast.displayBoard();
+        //fprintf(stderr, "move number: %d\n\n",++movenum);
+        
+
+        //get next move
+        //fprintf(stderr, "getting next action\n");
+
+        if(curplayer){
+            moves = players[curplayer]->agent1->getNextAction(moves);
+        }
+        else{
+            moves = players[curplayer]->agent0->getNextAction(moves);
+        }
+        players[curplayer]->movesTaken++;
+        
+        
+        //alternate player
+        curplayer = !curplayer;
+
+        movenum++;
+    }
+
+
+    players[0]->gamesPlayed++;
+    players[1]->gamesPlayed++;
+
+    players[0]->agent0->reset();
+    players[1]->agent1->reset();
+
+    if(winner != -1) players[winner]->wins++;
+
+    //gamemast.displayBoard();
+    //fprintf(stderr, "winner is %d\n",winner);
+}

@@ -25,6 +25,8 @@ class BotG0{
     void displayWeights(){gameTree.brian.displayWeights();fprintf(stderr,"\n");}
     
     void dive(){gameTree.dive();}
+
+    void reset();
 };
 
 
