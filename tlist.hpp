@@ -35,12 +35,6 @@ class tlist{
         coord ret;
         tnode* oldhead = head;
 
-        tnode* cur = head;
-
-        do{
-            cur = cur->next;
-        }while(cur != head);
-
         if(head){
             ret.x = head->crds.x;
             ret.y = head->crds.y;

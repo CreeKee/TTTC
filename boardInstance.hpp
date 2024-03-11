@@ -7,7 +7,7 @@
 class boardInstance{
 
     public:
-
+    bool dig;
     tile** board;
     uint32_t x_lim;
     uint32_t y_lim;
@@ -23,11 +23,7 @@ class boardInstance{
     boardInstance();
     boardInstance(tile** oldboard, uint32_t newx, uint32_t newy, uint32_t xshift, uint32_t yshift, MoveList oldDiff, uint32_t oldDDex);
     ~boardInstance(){
-        //fprintf(stderr,"boardInst destruct\n");
-        for(int col = 0; col < x_lim; col++){
-            //delete board[col];
-        }
-        //delete board;
+        delete [] board;        
     }
 
     tlist getAllMoves(int32_t actType);
@@ -42,16 +38,19 @@ class boardInstance{
 
         diff = B.diff;
 
-        board = (tile**)calloc(x_lim, sizeof(tile*));
+        board = B.board; 
+        /*
+        (tile**)calloc(x_lim, sizeof(tile*));
         for(int col = 0; col < x_lim; col++){
             board[col] = (tile*)calloc(y_lim, sizeof(tile));
         }
-
+        
 
         LISTERATION(
             board[x][y].type = B.board[x][y].type;
             board[x][y].owner = B.board[x][y].owner;
         )
+        */
     }
 
     bool makeMove(uint32_t actType, coord crds, uint32_t curPlayer);

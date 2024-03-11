@@ -76,12 +76,12 @@ class Brain{
     Brain(char* filename);
     Brain();
 
-    int32_t evaluate(boardInstance boardInst, int32_t* hardwin);
-    int32_t evaluateLight(boardInstance boardInst, int32_t* hardwin);
-    precepts gatherPrecepts(boardInstance boardInst);
-    precepts gatherPreceptsLight(boardInstance boardInst);
-    void gatherFromEmpty(precepts* traits, bool** checkfield, boardInstance boardInst, int x, int y, uint32_t len, int dx, int dy, uint32_t prevType);
-    void gatherFromAdj(precepts* traits, bool** checkfield, boardInstance boardInst, int x, int y, uint32_t len, int dx, int dy, uint32_t prevType);
+    int32_t evaluate(boardInstance* boardInst, int32_t* hardwin);
+    int32_t evaluateLight(boardInstance* boardInst, int32_t* hardwin);
+    precepts gatherPrecepts(boardInstance* boardInst);
+    precepts gatherPreceptsLight(boardInstance* boardInst);
+    void gatherFromEmpty(precepts* traits, bool** checkfield, boardInstance* boardInst, int x, int y, uint32_t len, int dx, int dy, uint32_t prevType);
+    void gatherFromAdj(precepts* traits, bool** checkfield, boardInstance* boardInst, int x, int y, uint32_t len, int dx, int dy, uint32_t prevType);
 
     void storeWeights(char* filename);
     void readWeights(char* filename);

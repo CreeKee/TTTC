@@ -44,9 +44,9 @@
 #define ADJTILE 4
 #define EBLOCK 5
 
-#define CLAIM 0 
+#define CLAIM 2 
 #define PLACE 1
-#define BLOCK 2
+#define BLOCK 3
 
 #define PLACETHREE 0
 #define BLOCKTWO 1
@@ -55,7 +55,8 @@
 #define SKIPCHOICE 4
 #define NULLACTION -1
 
-#define GRANULARITY 1000.0
+#define MAXTWEAK 100
+#define GRANULARITY 1.0
 #define ATROPHYRATIO 1.0
 
 
@@ -78,7 +79,11 @@
 
 #define DEPTH 2
 
-#define MOVELIMIT 15
+#define MOVELIMIT 13
+
+#define BUFFER_OFFSET(i) ((char *)NULL + (i))
+#define POPULATION 5
+#define DEFAULTFILE "weights/weight000.txt"
 
 #ifndef INCLUDES
 #define INCLUDES

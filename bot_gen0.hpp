@@ -10,6 +10,7 @@ class BotG0{
     private:
     gtObserver gameTree;
     bool doMax;
+    gtNode* top;
     
     public:
     BotG0(uint32_t playerID);
@@ -27,6 +28,8 @@ class BotG0{
     void dive(){gameTree.dive();}
 
     void reset();
+
+    void showCurrentBoard(){gameTree.head->boardInst.displayBoard();}
 };
 
 

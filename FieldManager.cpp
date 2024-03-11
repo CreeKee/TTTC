@@ -1,5 +1,7 @@
 #include "FieldManager.hpp"
 
+#define SCALEVALS   float scaledX = ((x+2*INITDIM)*SCALAR-2)/ratio;\
+                    float scaledY = ((y+INITDIM)*SCALAR-1)
 
 FieldManager::FieldManager(float ratio){
 
@@ -33,37 +35,42 @@ FieldManager::FieldManager(float ratio){
 //TODO: magicNum
 bool FieldManager::placeTile(int x, int y){
 
-    float scaledX = (x*SCALAR-2)/ratio;
-    float scaledY = (y*SCALAR-1);
+    SCALEVALS;
+    
 
     fprintf(stderr, "scaledX: %f, scaledY: %f from %d %d\n", scaledX, scaledY, x, y);
+
+    generateRectangle(scaledX, scaledY, M_PI/2);
+    generateRectangle(scaledX, scaledY, 0);
+    generateRectangle(3*lineWidth+scaledX+tileOffset, scaledY, M_PI/2);
+    generateRectangle(scaledX,  scaledY+(3*lineWidth+tileOffset)*ratio, 0);
+    /*
 
     if(!(x>0 && field[y][x-1].type != NULL)){
         //generate left side vertices
 
-        generateRectangle(scaledX, scaledY, M_PI/2);
+        
     }
     if(!(y>0 && field[y-1][x].type != NULL)){
         //generate bottom side vertices
-        generateRectangle(scaledX, scaledY, 0);
+        
 
     }
     if(!(x<fieldSize && field[y][x+1].type != NULL)){
         //generate right side vertices
-        generateRectangle(3*lineWidth+scaledX+tileOffset, scaledY, M_PI/2);
+        
 
     }
     if(!(y<fieldSize && field[y+1][x].type != NULL)){
         //generate top side vertices
-        generateRectangle(scaledX,  scaledY+(3*lineWidth+tileOffset)*ratio, 0);
+        
 
     }
-    fprintf(stderr, "done making reectangle\n");
+    fprintf(stderr, "done making reectangle\n");*/
 }
 
 bool FieldManager::blockTile(int x, int y){
-    float scaledX = (x*SCALAR-2)/ratio;
-    float scaledY = (y*SCALAR-1);
+    SCALEVALS;
     float length = tileOffset + 3*lineWidth;
 
     bool ret = true;
@@ -113,8 +120,7 @@ void FieldManager::claimTile(int x, int y, int id){
 
 void FieldManager::placeX(int x, int y){
 
-    float scaledX = (x*SCALAR-2)/ratio;
-    float scaledY = (y*SCALAR-1);
+    SCALEVALS;
 
     Line l1(M_PI/4, lineWidth*1.2, ratio, 2*tileOffset/3);
     Line l2(3*M_PI/4, lineWidth*1.2, ratio, 2*tileOffset/3);
@@ -139,8 +145,7 @@ void FieldManager::placeX(int x, int y){
 
 void FieldManager::placeTri(int x, int y){
 
-    float scaledX = (x*SCALAR-2)/ratio;
-    float scaledY = (y*SCALAR-1);
+    SCALEVALS;
 
     Line l1(M_PI/3, lineWidth, ratio, tileOffset/2);
     Line l2(M_PI, lineWidth, ratio, tileOffset/2);
@@ -172,10 +177,8 @@ void FieldManager::placeTri(int x, int y){
 
 
 void FieldManager::generateRectangle(float x, float y, double rotation){
-
     Line l1(rotation, lineWidth, ratio, tileOffset);
     l1.add(x,y);
-
     for(int verts = 0; verts<6; verts++){
         vertField[vcount].pos.x = l1.get(verts).pos.x;
         vertField[vcount].pos.y = l1.get(verts).pos.y;

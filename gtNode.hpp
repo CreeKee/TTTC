@@ -9,6 +9,7 @@ class gtNode{
     gtNode** children;
     gtNode* parent;
     int32_t value;
+    int32_t winnable;
     uint32_t childCount;
     uint32_t maxKids;
     bool isleaf;
@@ -23,16 +24,14 @@ class gtNode{
         children = (gtNode**)calloc(INITKIDS, sizeof(gtNode*));
         isleaf = true;
         atrophy = false;
+        parent = nullptr;
+        winnable = 0;
     }
-    gtNode(boardInstance incBoard, gtNode* prev);
+    gtNode(boardInstance* incBoard, gtNode* prev);
     ~gtNode(){
-        //fprintf(stderr, "gtNode destructor\n");
-
+        
         if(children){
-            for(uint32_t kid = 0; kid < childCount; kid++){
-                delete children[kid];
-            }
-            free(children);
+            delete [] children;
         }
     }
 
@@ -41,10 +40,12 @@ class gtNode{
             if(doMax){
                 if(value > parent->value){
                     parent->value = value;
+                    parent->winnable = winnable;
                 }
             }
             else if(value < parent->value){
                 parent->value = value;
+                parent->winnable = winnable;
             }
             parent->backprop(!doMax);
         }
@@ -52,7 +53,8 @@ class gtNode{
     void backprop(bool doMax, bool force){
         
         if(parent != nullptr){
-            parent->value = value;
+            //parent->value = value;
+            parent->winnable = winnable;
             parent->backprop(!doMax);
         }
     }
@@ -66,16 +68,16 @@ class gtNode{
 
     void expandPlaceThreeEmpty();
     void expandBlockTwo();
-    void expandClaimOne(uint32_t playerID);
+    bool expandClaimOne(uint32_t playerID);
     void expandPlaceAndBlock();
 
-    void computeAction(uint32_t actType, coord crds, tlist remList, uint32_t reps, boardInstance binst);
+    bool computeAction(uint32_t actType, coord crds, tlist remList, uint32_t reps, boardInstance* binst);
 
-    void storeBoard(boardInstance boardInst);
+    void storeBoard(boardInstance* boardInst);
 
     void delve(int depth){
         for(int knum = 0; knum < childCount; knum++){
-             fprintf(stderr, "(%d,%d)", depth, knum);
+            fprintf(stderr, "(%d,%d)", depth, knum);
         }
         for(int knum = 0; knum < childCount; knum++){
             children[knum]->delve(depth+1);

@@ -52,9 +52,8 @@ class GameMaster{
     GameMaster(int numPlayers);
 
     void startGame(){
-        
-        if(FM != nullptr) FM->placeTile(INITDIM*2, INITDIM);
-        if(FM != nullptr) FM->blockTile(INITDIM*2, INITDIM);
+        if(FM != nullptr) FM->placeTile(0, 0);
+        if(FM != nullptr) FM->blockTile(0, 0);
 
         std::cout << std::endl << 
             "it is player " << curPlayer+1 <<
@@ -69,6 +68,7 @@ class GameMaster{
     bool gameAction(int action, coord crds, int* winner);
     int getPlayerChoice();
     coord getDesiredTile(); 
+    uint32_t getCurPlayer(){return curPlayer;}
 
     int takeTurn();
     int takeTurn(MoveList moves);

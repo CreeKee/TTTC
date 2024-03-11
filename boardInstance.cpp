@@ -4,9 +4,11 @@
 
 boardInstance::boardInstance(){
 
+    dig = false;
     x_lim = BOARDINSTINIT;
     y_lim = BOARDINSTINIT;
     board = new tile*[x_lim]();
+
 
     x_scale = 0;
     y_scale = 0;
@@ -15,7 +17,6 @@ boardInstance::boardInstance(){
     for(int col = 0; col < x_lim; col++){
         board[col] = new tile[y_lim]();
     }
-
     board[(x_lim>>1)][(y_lim>>1)].type = BLOCKEDTILE;
 
     board[(x_lim>>1)-1][(y_lim>>1)].type = ADJTILE;
@@ -25,7 +26,7 @@ boardInstance::boardInstance(){
 }
 
 boardInstance::boardInstance(tile** oldboard, uint32_t newx, uint32_t newy, uint32_t xshift, uint32_t yshift, MoveList oldDiff, uint32_t oldDDex){
-
+    dig = true;
     x_lim = newx+(xshift<<1);
     y_lim = newy+(yshift<<1);
     board = new tile*[x_lim]();
@@ -45,8 +46,7 @@ boardInstance::boardInstance(tile** oldboard, uint32_t newx, uint32_t newy, uint
         for(int row = yshift; row < y_lim-yshift; row++){
             board[col][row] = oldboard[col-xshift][row-yshift];
         }
-    }
-    
+    }    
 }
 
 tlist boardInstance::getAllMoves(int32_t actType){
@@ -111,7 +111,6 @@ tlist boardInstance::getAllMoves(int32_t actType){
 will automaticall shift dimensions 
 */
 bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
-
     //boardInstance newboard = boardInstance(binst.board, binst.x_lim, binst.y_lim, binst.x_scale, binst.y_scale, binst.diff, binst.diffDex);
     
     //adjust coordinets from logical board to actual board
@@ -122,7 +121,7 @@ bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
     tile** oldboard = board;
     bool validMove = false;
 
-    fprintf(stderr, "***%d %d*** >", crds.x, crds.y);
+    //fprintf(stderr, "***%d %d*** >", crds.x, crds.y);
 
     //check if board needs to be expanded
     if(shiftx >= x_lim-4 || shiftx <= 4){
@@ -140,7 +139,7 @@ bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
         y_lim = y_lim+(y_scale<<1);
 
         //create new board
-        board = new tile*[x_lim];
+        board = new tile*[x_lim]();
 
         for(int col = 0; col < x_lim; col++){
             board[col] = new tile[y_lim]();
@@ -152,8 +151,6 @@ bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
                 board[col][row] = oldboard[col-x_scale][row-y_scale];
             }
 
-            //delete old board
-            delete oldboard[col-x_scale];
         }
 
         //reset scaling
@@ -161,7 +158,8 @@ bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
         y_scale = 0;
 
         //finish deleteing old board
-        delete oldboard;
+        delete [] oldboard;
+        oldboard = nullptr;
     }
 
 
@@ -169,7 +167,7 @@ bool boardInstance::makeMove(uint32_t actType, coord crds, uint32_t curPlayer){
     shiftx = crds.x + (x_lim>>1);
     shifty = crds.y + (y_lim>>1);
 
-    fprintf(stderr, "> ***%d %d***\n", shiftx, shifty);
+    //fprintf(stderr, "> ***%d %d***\n", shiftx, shifty);
 
     switch(curAct){
         case EMPTYTILE:
@@ -243,7 +241,6 @@ void boardInstance::displayBoard(){
 }
 
 bool boardInstance::checkWinCon(coord crds, uint32_t curPlayer){
-
     crds.x += x_lim>>1;
     crds.y += y_lim>>1;
 
@@ -299,7 +296,6 @@ bool boardInstance::checkWinCon(coord crds, uint32_t curPlayer){
         ret = (lined >= 2);
         lined = 0;  
     }
-
     return ret;
 }
 

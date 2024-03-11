@@ -63,7 +63,7 @@ bool GameMaster::gameAction(int action, coord crds, int* winner){
 
     switch(action){
         case CLAIM:
-            fprintf(stderr, "handling claim action\n");
+            //fprintf(stderr, "handling claim action\n");
             if(ret = claimTile(crds)){
                 
                 if(boardInst.checkWinCon(crds, curPlayer)){
@@ -110,14 +110,16 @@ int GameMaster::takeTurn(){
                 if(phase == READY) steps = 3;
 
                 pos = getDesiredTile();
+
                 
-                if(pos.x >= 0 && pos.y >= 0){
+                if(pos.x != 0 || pos.y != 0){
                     if(gameAction(PLACE, pos, &winner)){
                         steps--;
                         phase = ACTIVE;
                     } 
-                    if(steps == 0) phase = END;
+                    else fprintf(stderr, "Illegal place tile action taken\n");
                 }
+                if(steps == 0) phase = END;
                 
                 break;
 
@@ -126,11 +128,13 @@ int GameMaster::takeTurn(){
                 if(phase == READY) steps = 2;
                 
                 pos = getDesiredTile();
-                if(pos.x >= 0 && pos.y >= 0){
+
+                if(pos.x != 0 || pos.y != 0){
                     if(gameAction(BLOCK, pos, &winner)){
                         steps--;
                         phase = ACTIVE;
                     }
+                    else fprintf(stderr, "Illegal block tile action taken\n");
                     if(steps == 0) phase = END;
                 }
                 
@@ -147,11 +151,12 @@ int GameMaster::takeTurn(){
                 if(phase == READY) steps = 1;
 
                 pos = getDesiredTile();
-                if(pos.x >= 0 && pos.y >= 0){
+                if(pos.x != 0 || pos.y != 0){
                     if(gameAction(CLAIM, pos, &winner)){
                         steps--;
                         phase = ACTIVE;
                     } 
+                    else fprintf(stderr, "Illegal claim tile action taken\n");
                     if(steps == 0) phase = END;
                 }
 
@@ -162,7 +167,7 @@ int GameMaster::takeTurn(){
                 if(phase == READY) steps = 2;
                 if(steps == 2){
                     pos = getDesiredTile();
-                    if(pos.x >= 0 && pos.y >= 0){
+                    if(pos.x != 0 || pos.y != 0){
                         if(gameAction(PLACE, pos, &winner)){
                             steps--;
                             phase = ACTIVE;
@@ -171,7 +176,7 @@ int GameMaster::takeTurn(){
                 }
                 else if(steps == 1){
                     pos = getDesiredTile();
-                    if(pos.x >= 0 && pos.y >= 0){
+                    if(pos.x != 0 || pos.y != 0){
                         if(gameAction(BLOCK, pos, &winner)) steps--;
                     }
                 }
@@ -197,6 +202,7 @@ int GameMaster::takeTurn(){
         }
 
         if(phase == END){
+            
             curPlayer = (curPlayer+1)%playerCount;
             WM->click.pressed = false;
 
@@ -233,6 +239,7 @@ int GameMaster::takeTurn(MoveList moves){
 
         switch(moves.moves[move].action){
             case EMPTYTILE:
+                fprintf(stderr, "placing at %d %d\n",crds.x, crds.y);
                 if(!gameAction(PLACE, crds, &winner)) fprintf(stderr, "Illegal place tile action taken\n");
             break;
             
@@ -325,8 +332,8 @@ coord GameMaster::getDesiredTile(){
         pos.x *= INITDIM*2*RATIO;
         pos.y *= INITDIM*2;
 
-        crds.x = pos.x+INITDIM*2;
-        crds.y = pos.y+INITDIM;
+        crds.x = pos.x;
+        crds.y = pos.y;
 
         /*
         crds.x = pos.x*BIAS*(INITDIM*2)*RATIO;
@@ -336,12 +343,12 @@ coord GameMaster::getDesiredTile(){
         crds.y += INITDIM;
         */
 
-        fprintf(stderr,"the selected tile is at (ints) x: %d, y: %d\n", crds.x, crds.y);
+        //fprintf(stderr,"the selected tile is at (ints) x: %d, y: %d\n", crds.x, crds.y);
         WM->click.pressed = false;
     }
     else{
-        crds.x = -1;
-        crds.y = -1;
+        crds.x = 0;
+        crds.y = 0;
     }
     
     return crds;

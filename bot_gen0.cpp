@@ -11,11 +11,11 @@ BotG0::BotG0(uint32_t playerID){
     doMax = (playerID == 0);
 
     gameTree.brian.setPlayerID(playerID);
-
+    top = gameTree.head;
 
     if(DBG) fprintf(stderr,"bot constructor\n");
 
-    for(int d = 0; d < DEPTH; d++){
+    for(int d = 0; d < DEPTH+2; d++){
         gameTree.computeLayer(doMax);
     }
 
@@ -26,11 +26,9 @@ BotG0::BotG0(uint32_t playerID){
 BotG0::BotG0(uint32_t playerID, char* filename){
 
     doMax = (playerID == 0);
-
+    top = gameTree.head;
     gameTree.brian.setPlayerID(playerID);
     gameTree.brian.readWeights(filename);
-
-    fprintf(stderr,"bot constructor for player %d\n",playerID);
 
     for(int d = 0; d < DEPTH; d++){
         gameTree.computeLayer(doMax);
@@ -42,7 +40,6 @@ BotG0::BotG0(uint32_t playerID, char* filename){
 MoveList BotG0::getNextAction(MoveList mvl){
 
     MoveList moves;
-
     gameTree.updateBoard(mvl);
     QUICHECK
 
@@ -65,8 +62,12 @@ MoveList BotG0::getNextAction(){
 }
 
 void BotG0::reset(){
+
     doMax = (gameTree.brian.playerID == 0);
-    gameTree.reset();
+    fprintf(stderr,"\n\n!!!resetting!!!\n\n");
+    delete top;
+    gameTree.head = new gtNode;
+
     for(int d = 0; d < DEPTH; d++){
         gameTree.computeLayer(doMax);
     }

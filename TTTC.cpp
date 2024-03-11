@@ -6,11 +6,7 @@
 #include "GameMaster.hpp"
 #include "bot_gen0.hpp"
 
-
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
-#define POPULATION 100
-
-
+#define AGENTID 1
 
 struct AgentData{
     BotG0* agent0;
@@ -19,11 +15,13 @@ struct AgentData{
     uint32_t wins = 0;
     uint32_t gamesPlayed = 0;
     uint32_t movesTaken = 0;
+
+    char filename[22] = DEFAULTFILE;
 };
 
 AgentData runGeneration();
 void runGame(AgentData** players);
-
+void humanVsAgent();
 void displayMove(MoveList moves){
 
     //display info about the move
@@ -39,7 +37,17 @@ void displayMove(MoveList moves){
 }
 
 int main(int argc, char** argv){
-    /*position p;
+    AgentData bestAgent;
+    uint8_t digitA = '0';
+    uint8_t digitB = '0';
+    uint8_t digitC = '0';
+    char filename[] = DEFAULTFILE;
+
+    humanVsAgent();
+
+
+    /*
+    position p;
     int a = 0;
     int b = 0;
     int winner = -1;
@@ -144,12 +152,93 @@ int main(int argc, char** argv){
     bot.updateWeights();
     bot.saveWeights("weights1.txt");
     */
+    /*
+    bestAgent = runGeneration();
     
-    runGeneration();
+    fprintf(stderr, "best file was: %s\n", bestAgent.filename);
+
+    for(int agent = 0; agent < POPULATION; agent++){
+        
+        bestAgent.agent0->saveWeights(filename);
+        bestAgent.agent0->updateWeights();
+
+        digitA = (agent+1)%10+'0';
+        digitB = ((agent+1)/10)%10+'0';
+        digitC = ((agent+1)/100)%10+'0';
+
+        filename[14] = digitC;
+        filename[15] = digitB;
+        filename[16] = digitA;
+
+    }
+    */
     
     fprintf(stderr, "ending main\n");
     return 0;
 }
+
+
+void humanVsAgent(){
+    bool flop = true;
+    MoveList moves;
+    int winner = -1;
+    WindowManager winman;
+    FieldManager fieldman((((float)WIDTH)/HEIGHT));
+    GameMaster gamemast(2);
+    BotG0 agent(1, DEFAULTFILE);
+    
+    gamemast.setFM(&fieldman);
+    gamemast.setWM(&winman);
+
+    fieldman.setField(gamemast.getField());
+    //GLint mvp_location, vpos_location, vcol_location;
+
+    winman.createWindow(WINDOW_NAME, WIDTH, HEIGHT);
+    winman.initBuff(1);
+    winman.initShaders(vertex_shader_text, fragment_shader_text);
+    winman.initAttributes();
+    fprintf(stderr, "starting game\n");
+    gamemast.startGame();
+    
+    while (!winman.shouldClose() && winner == -1){
+
+        winman.bufferData(fieldman.getVCount()*sizeof(vertex), (void*)fieldman.getVField());
+
+        winman.uDisp(fieldman.getVCount());
+
+        //human takes turn
+        if(gamemast.getCurPlayer() != AGENTID){ 
+            if(winner == -1) winner = gamemast.takeTurn();
+            if(flop){
+                gamemast.displayBoard();
+                fprintf(stderr, "taking human's turn\n");
+                flop = false;
+            }
+            }
+        
+        //agent takes turn
+        else if(winner == -1){
+            flop = true;
+            gamemast.getPrevMoves().display();
+            gamemast.displayBoard();
+            fprintf(stderr, "\ntaking agent's turn\n");
+            agent.showCurrentBoard();
+            moves = agent.getNextAction(gamemast.getPrevMoves());
+            agent.showCurrentBoard();
+            moves.display();
+            winner = gamemast.takeTurn(moves);
+        }
+
+    }
+    if(winner != -1) std::cout << std::endl <<"***Player " << winner+1 <<" wins!***" << std::endl;
+    while (!winman.shouldClose()){
+         winman.bufferData(fieldman.getVCount()*sizeof(vertex), (void*)fieldman.getVField());
+
+        winman.uDisp(fieldman.getVCount());
+    }
+    winman.end();
+}
+
 
 AgentData runGeneration(){
     uint8_t digitA = '0';
@@ -157,7 +246,7 @@ AgentData runGeneration(){
     uint8_t digitC = '0';
     uint32_t best = 0;
 
-    char filename[] = "weights/weight000.txt";
+    char filename[] = DEFAULTFILE;
     AgentData agents[POPULATION];
     AgentData* players[2];
     
@@ -170,9 +259,14 @@ AgentData runGeneration(){
         digitB = ((agent+1)/10)%10+'0';
         digitC = ((agent+1)/100)%10+'0';
 
-        //filename[14] = digitC;
-        //filename[15] = digitB;
-        //filename[16] = digitA;
+        filename[14] = digitC;
+        filename[15] = digitB;
+        filename[16] = digitA;
+
+        agents[agent].filename[14] = digitC;
+        agents[agent].filename[15] = digitB;
+        agents[agent].filename[16] = digitA;
+
 
     }
 
@@ -180,11 +274,11 @@ AgentData runGeneration(){
         for(int agentB = agentA+1; agentB<POPULATION; agentB++){
             players[0] = &agents[agentA];
             players[1] = &agents[agentB];
-            //runGame(players);
+            runGame(players);
 
             players[0] = &agents[agentB];
             players[1] = &agents[agentA];
-            //runGame(players);
+            runGame(players);
         }
     }
     
@@ -224,8 +318,8 @@ void runGame(AgentData** players){
     while(((winner = gamemast.takeTurn(moves)) == -1) && movenum<MOVELIMIT){
 
         //display board and announce move number
-        //gamemast.displayBoard();
-        //fprintf(stderr, "move number: %d\n\n",++movenum);
+        gamemast.displayBoard();
+        fprintf(stderr, "player %d - move number: %d\n\n",curplayer, movenum+1);
         
 
         //get next move
@@ -253,8 +347,14 @@ void runGame(AgentData** players){
     players[0]->agent0->reset();
     players[1]->agent1->reset();
 
-    if(winner != -1) players[winner]->wins++;
-
+    if(winner != -1){
+        players[winner]->wins++;
+        fprintf(stderr, "winner was %d\n",winner);
+        gamemast.displayBoard();
+    }
+    else{
+        fprintf(stderr, "game ended in draw\n");
+    }
     //gamemast.displayBoard();
     //fprintf(stderr, "winner is %d\n",winner);
 }

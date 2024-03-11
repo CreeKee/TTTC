@@ -51,5 +51,12 @@ class MoveList{
         }
         return ret;
     }
+
+    void display(){
+        for(int index = 0; index<moveDex; index++){
+            fprintf(stderr,"%d@(%d,%d) ",moves[index].action,moves[index].x,moves[index].y );
+        }
+        fprintf(stderr, "\n");
+    }
 };
 #endif
