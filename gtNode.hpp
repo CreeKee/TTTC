@@ -6,6 +6,7 @@
 
 class gtNode{
     public:
+    
     gtNode** children;
     gtNode* parent;
     int32_t value;

@@ -236,6 +236,7 @@ void humanVsAgent(){
 
         winman.uDisp(fieldman.getVCount());
     }
+
     winman.end();
 }
 

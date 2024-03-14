@@ -165,6 +165,12 @@ void gtNode::storeBoard(boardInstance* boardInst){
         maxKids = maxKids<<1;
         children = (gtNode**)realloc(children, sizeof(gtNode*)*maxKids);
     }
+    boardCount++;
+
+    if(boardCount%100000 == 0){
+        fprintf(stderr, "board count = %d\n",boardCount);
+    }
+
     //add child to child table
     children[childCount++] = new gtNode(boardInst, this);
 }

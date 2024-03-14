@@ -16,6 +16,7 @@ class BotG0{
     BotG0(uint32_t playerID);
     BotG0(uint32_t playerID, char* filename);
 
+
     //all move*'s are assumed to be well initiated versions of move moves[3]
     MoveList getNextAction(MoveList moves);
     MoveList getNextAction();

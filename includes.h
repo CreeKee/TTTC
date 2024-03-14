@@ -7,6 +7,7 @@
 #include <math.h>
 #include <iostream>
 
+
 #define DISPLAYBOARD(x_dist, y_dist, code)for(int x = 0; x<x_dist; x++){\
                 for(int y = 0; y<y_dist; y++){\
                     code;\
@@ -87,7 +88,6 @@
 
 #ifndef INCLUDES
 #define INCLUDES
-
 /*
 struct boardData{
     uint32_t emptyTiles;

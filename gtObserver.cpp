@@ -17,17 +17,17 @@ void gtObserver::updateBoard(MoveList mvl){
     gtNode* newhead;
     int w = 0;
 
-    if(true){
+    if(DBG){
         fprintf(stderr,"updating player %d's board with moves: ", brian.playerID);
         mvl.display();
     }
     while(kidDex < head->childCount-1 && head->children[kidDex] && !(mvl == head->children[kidDex]->boardInst.diff)){
-        fprintf(stderr,"%d | %d = ", kidDex, head->children[kidDex]->value);
+        //fprintf(stderr,"%d | %d = ", kidDex, head->children[kidDex]->value);
         head->children[kidDex]->boardInst.diff.display();
         kidDex++;
     }
 
-    fprintf(stderr,"%d | %d = ", kidDex, brian.evaluate(&head->children[kidDex]->boardInst, &w));
+    //fprintf(stderr,"%d | %d = ", kidDex, brian.evaluate(&head->children[kidDex]->boardInst, &w));
     head->children[kidDex]->boardInst.diff.display();
 
     if(DBG){
