@@ -15,11 +15,7 @@ class MCNode{
 
 };
 
-class MCTree{
-    MCNode head;
-    MoveList* curMove;
 
-};
 
 
 

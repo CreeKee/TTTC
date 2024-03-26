@@ -23,12 +23,12 @@ void gtObserver::updateBoard(MoveList mvl){
     }
     while(kidDex < head->childCount-1 && head->children[kidDex] && !(mvl == head->children[kidDex]->boardInst.diff)){
         //fprintf(stderr,"%d | %d = ", kidDex, head->children[kidDex]->value);
-        head->children[kidDex]->boardInst.diff.display();
+        //head->children[kidDex]->boardInst.diff.display();
         kidDex++;
     }
 
     //fprintf(stderr,"%d | %d = ", kidDex, brian.evaluate(&head->children[kidDex]->boardInst, &w));
-    head->children[kidDex]->boardInst.diff.display();
+    //head->children[kidDex]->boardInst.diff.display();
 
     if(DBG){
         fprintf(stderr,"kidDex == %d out of %d which has diff of: ",kidDex, head->childCount);

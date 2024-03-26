@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
+#include <random>
 
 
 #define DISPLAYBOARD(x_dist, y_dist, code)for(int x = 0; x<x_dist; x++){\
